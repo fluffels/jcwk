@@ -1,5 +1,13 @@
 #include "FileSystem.h"
 
+#include <io.h>
+
+bool
+fexists(char* path) {
+    auto accessResult = _access_s(path, 4);
+    return accessResult != ENOENT;
+}
+
 std::vector<char>
 readFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
@@ -14,7 +22,8 @@ readFile(const std::filesystem::path& path) {
     return buffer;
 }
 
-void seek(FILE* file, int32_t offset) {
+void
+seek(FILE* file, int32_t offset) {
     auto code = fseek(file, offset, SEEK_SET);
     if (code != 0) {
         throw std::runtime_error("could not seek to position");
