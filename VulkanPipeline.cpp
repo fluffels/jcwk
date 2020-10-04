@@ -156,6 +156,14 @@ void createShaderModule(
 }
 
 void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
+    auto accessResult = _access_s(path.c_str(), 4);
+    if (accessResult == EACCES) {
+        LOG(ERROR) << "file '" << path << "': access denied";
+        exit(-1);
+    } else if (accessResult == ENOENT) {
+        LOG(ERROR) << "file '" << path << "': file not found";
+        exit(-1);
+    }
     auto code = readFile(path);
     createShaderModule(vk, code, shader);
 }
@@ -394,15 +402,11 @@ void initVKPipeline(
 
     char vertFile[255];
     sprintf_s(vertFile, "shaders/%s.vert.spv", name);
-    if (_access_s(vertFile, 2) == 0) {
-        createShaderModule(vk, vertFile, shaders[0]);
-    }
+    createShaderModule(vk, vertFile, shaders[0]);
 
     char fragFile[255];
     sprintf_s(fragFile, "shaders/%s.frag.spv", name);
-    if (_access_s(vertFile, 2) == 0) {
-        createShaderModule(vk, fragFile, shaders[1]);
-    }
+    createShaderModule(vk, fragFile, shaders[1]);
 
     createDescriptorLayout(vk, shaders, pipeline);
     createDescriptorPool(vk, shaders, pipeline);
