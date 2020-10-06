@@ -402,10 +402,20 @@ void initVKPipeline(
 
     char vertFile[255];
     sprintf_s(vertFile, "shaders/%s.vert.spv", name);
-    createShaderModule(vk, vertFile, shaders[0]);
-
+    char meshFile[255];
+    sprintf_s(meshFile, "shaders/%s.mesh.spv", name);
     char fragFile[255];
     sprintf_s(fragFile, "shaders/%s.frag.spv", name);
+
+    if (fexists(vertFile)) {
+        createShaderModule(vk, vertFile, shaders[0]);
+    } else if (fexists(meshFile)) {
+        createShaderModule(vk, meshFile, shaders[0]);
+    } else {
+        LOG(ERROR) << "pipeline '" << name << "' has no vert/mesh shader";
+        exit(-1);
+    }
+
     createShaderModule(vk, fragFile, shaders[1]);
 
     createDescriptorLayout(vk, shaders, pipeline);
