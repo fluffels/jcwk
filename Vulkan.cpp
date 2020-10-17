@@ -99,7 +99,20 @@ void createVKInstance(Vulkan& vk) {
     auto enabledExtensionNames = stringVectorToC(vk.extensions);
     createInfo.ppEnabledExtensionNames = enabledExtensionNames;
     
-    checkSuccess(vkCreateInstance(&createInfo, nullptr, &vk.handle));
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &vk.handle);
+    if (result == VK_ERROR_INITIALIZATION_FAILED) {
+        LOG(ERROR) << "VK initialization failed";
+    } else if (result == VK_ERROR_LAYER_NOT_PRESENT) {
+        LOG(ERROR) << "layer not present";
+    } else if (result == VK_ERROR_EXTENSION_NOT_PRESENT) {
+        LOG(ERROR) << "extension not present";
+    } else if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
+        LOG(ERROR) << "driver not compatible";
+    }
+    if (result != VK_SUCCESS) {
+        LOG(ERROR) << "vkCreateInstance failed";
+        exit(-1);
+    }
 
     createDebugCallback(vk);
 
