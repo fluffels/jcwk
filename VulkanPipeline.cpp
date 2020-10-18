@@ -241,28 +241,19 @@ void describeInputAttributes(
 
 void createPipeline(
     Vulkan& vk,
-    VulkanShader& vert,
-    VulkanShader& frag,
+    vector<VulkanShader>& shaders,
     VkPrimitiveTopology topology,
     VkFrontFace frontFace,
     VulkanPipeline& pipeline
 ) {
     vector<VkPipelineShaderStageCreateInfo> shaderStages;
-    if (vert.module) {
-        VkPipelineShaderStageCreateInfo vertStage = {};
-        vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertStage.module = vert.module;
-        vertStage.pName = "main";
-        shaderStages.push_back(vertStage);
-    }
-    if (frag.module) {
-        VkPipelineShaderStageCreateInfo fragStage = {};
-        fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragStage.module = frag.module;
-        fragStage.pName = "main";
-        shaderStages.push_back(fragStage);
+    for (auto& shader: shaders) {
+        auto& shaderStage = shaderStages.emplace_back();
+        shaderStage = {};
+        shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        shaderStage.stage = (VkShaderStageFlagBits)shader.reflect.shader_stage;
+        shaderStage.module = shader.module;
+        shaderStage.pName = "main";
     }
 
     pipeline.inputBinding.binding = 0;
@@ -270,7 +261,9 @@ void createPipeline(
 
     describeInputAttributes(
         pipeline,
-        vert
+        // NOTE(jan): presumably, the first shader will always be the input
+        // stage
+        shaders[0]
     );
 
     VkPipelineVertexInputStateCreateInfo vertexInput = {};
@@ -423,7 +416,8 @@ void initVKPipeline(
     allocateDescriptorSet(vk, pipeline);
     createPipelineLayout(vk, shaders, pipeline);
     createPipeline(
-        vk, shaders[0], shaders[1],
+        vk,
+        shaders,
         topology,
         frontFace,
         pipeline
