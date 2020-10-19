@@ -79,8 +79,40 @@ void createVKInstance(Vulkan& vk) {
     vkEnumerateInstanceVersion(&version);
     checkVersion(version);
 
+    uint32_t propertyCount = 0;
+    vector<VkExtensionProperties> properties;
+    checkSuccess(
+        vkEnumerateInstanceExtensionProperties(
+            NULL,
+            &propertyCount,
+            NULL
+        )
+    )
+    properties.resize(propertyCount);
+    checkSuccess(
+        vkEnumerateInstanceExtensionProperties(
+            NULL,
+            &propertyCount,
+            properties.data()
+        )
+    )
+
     vk.extensions.insert(vk.extensions.begin(), VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     vk.extensions.insert(vk.extensions.begin(), VK_KHR_SURFACE_EXTENSION_NAME);
+
+    for (auto& requestedExtension: vk.extensions) {
+        bool found = false;
+        for (auto& availableExtension: properties) {
+            if (requestedExtension == availableExtension.extensionName) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            LOG(ERROR) << "extension " << requestedExtension << " not available";
+            exit(-1);
+        }
+    }
 
     vk.layers.push_back("VK_LAYER_KHRONOS_validation");
 
