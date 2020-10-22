@@ -79,21 +79,40 @@ void createVKInstance(Vulkan& vk) {
     vkEnumerateInstanceVersion(&version);
     checkVersion(version);
 
-    uint32_t propertyCount = 0;
-    vector<VkExtensionProperties> properties;
+    uint32_t layerCount = 0;
+    vector<VkLayerProperties> layers;
+    checkSuccess(
+        vkEnumerateInstanceLayerProperties(
+            &layerCount,
+            NULL
+        )
+    );
+    layers.resize(layerCount);
+    checkSuccess(
+        vkEnumerateInstanceLayerProperties( 
+            &layerCount,
+            layers.data()
+        )
+    );
+    for (auto& layer: layers) {
+        LOG(INFO) << "available layer: " << layer.layerName;
+    }
+
+    uint32_t extensionCount = 0;
+    vector<VkExtensionProperties> extensions;
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
-            &propertyCount,
+            &extensionCount,
             NULL
         )
     )
-    properties.resize(propertyCount);
+    extensions.resize(extensionCount);
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
-            &propertyCount,
-            properties.data()
+            &extensionCount,
+            extensions.data()
         )
     )
 
@@ -102,7 +121,7 @@ void createVKInstance(Vulkan& vk) {
 
     for (auto& requestedExtension: vk.extensions) {
         bool found = false;
-        for (auto& availableExtension: properties) {
+        for (auto& availableExtension: extensions) {
             if (requestedExtension == availableExtension.extensionName) {
                 found = true;
                 break;
