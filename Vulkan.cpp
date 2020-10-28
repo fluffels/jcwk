@@ -211,6 +211,22 @@ void pickGPU(Vulkan& vk) {
             continue;
         }
 
+        {
+            VkPhysicalDeviceMeshShaderFeaturesNV meshShader = {};
+            meshShader.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+
+            VkPhysicalDeviceFeatures2 features2 = {};
+            features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+            features2.pNext = &meshShader;
+
+            vkGetPhysicalDeviceFeatures2(gpu, &features2);
+            if (meshShader.meshShader && meshShader.taskShader) {
+                LOG(INFO) << "gpu supports mesh shaders";
+            } else {
+                LOG(INFO) << "gpu does not support mesh shaders";
+            }
+        }
+
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
         vector<VkQueueFamilyProperties> families(familyCount);
