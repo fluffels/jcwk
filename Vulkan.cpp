@@ -212,15 +212,16 @@ void pickGPU(Vulkan& vk) {
         }
 
         {
-            VkPhysicalDeviceMeshShaderFeaturesNV meshShader = {};
-            meshShader.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+            VkPhysicalDeviceMeshShaderFeaturesNV meshFeatures = {};
+            meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
 
-            VkPhysicalDeviceFeatures2 features2 = {};
-            features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-            features2.pNext = &meshShader;
+            VkPhysicalDeviceFeatures2 features = {};
+            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+            features.pNext = &meshFeatures;
 
-            vkGetPhysicalDeviceFeatures2(gpu, &features2);
-            if (meshShader.meshShader && meshShader.taskShader) {
+            vkGetPhysicalDeviceFeatures2(gpu, &features);
+            vk.supportsMeshShaders = meshFeatures.meshShader && meshFeatures.taskShader;
+            if (vk.supportsMeshShaders) {
                 LOG(INFO) << "gpu supports mesh shaders";
             } else {
                 LOG(INFO) << "gpu does not support mesh shaders";
@@ -276,8 +277,21 @@ void createDevice(Vulkan& vk) {
 
     vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
+    VkPhysicalDeviceMeshShaderFeaturesNV meshFeatures = {};
+    meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
+    meshFeatures.meshShader = true;
+    meshFeatures.taskShader = true;
+
+    VkPhysicalDeviceFeatures2 features = {};
+    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+
+    if (vk.supportsMeshShaders) {
+        features.pNext = &meshFeatures;
+    }
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pNext = &features;
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(
         queueCreateInfos.size()
     );
