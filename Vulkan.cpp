@@ -264,6 +264,21 @@ void pickGPU(Vulkan& vk) {
     throw runtime_error("no suitable physical device found");
 }
 
+PFN_vkVoidFunction getFunction(Vulkan& vk, const char* name) {
+    auto result = vkGetDeviceProcAddr(vk.device, name);
+    if (result == NULL) {
+        LOG(ERROR) << "could not find " << name;
+        exit(-1);
+    }
+    return result;
+}
+
+void getFunctions(Vulkan& vk) {
+    vk.cmdDrawMeshTasksNV = 
+        (PFN_vkCmdDrawMeshTasksNV)
+        getFunction(vk, "vkCmdDrawMeshTasksNV");
+}
+
 void createDevice(Vulkan& vk) {
     vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
@@ -368,6 +383,7 @@ void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
 void initVK(Vulkan& vk) {
     pickGPU(vk);
     createDevice(vk);
+    getFunctions(vk);
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.mvp);

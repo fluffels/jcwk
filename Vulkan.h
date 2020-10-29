@@ -73,6 +73,8 @@ struct Vulkan {
     VkCommandPool cmdPoolTransient;
 
     bool supportsMeshShaders;
+
+    PFN_vkCmdDrawMeshTasksNV cmdDrawMeshTasksNV;
 };
 
 struct VulkanShader {
