@@ -292,6 +292,10 @@ void createDevice(Vulkan& vk) {
 
     vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
+    if (vk.supportsMeshShaders) {
+        extensions.push_back(VK_NV_MESH_SHADER_EXTENSION_NAME);
+    }
+
     VkPhysicalDeviceMeshShaderFeaturesNV meshFeatures = {};
     meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
     meshFeatures.meshShader = true;
