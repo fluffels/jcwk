@@ -276,9 +276,9 @@ void createPipeline(
     vertexInput.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     if (!isMeshPipeline) {
-        vertexInput.vertexBindingDescriptionCount = 0;
+        vertexInput.vertexBindingDescriptionCount = 1;
         vertexInput.pVertexBindingDescriptions = &pipeline.inputBinding;
-        vertexInput.vertexAttributeDescriptionCount = 0;
+        vertexInput.vertexAttributeDescriptionCount =
             (uint32_t)pipeline.inputAttributes.size();
         vertexInput.pVertexAttributeDescriptions = pipeline.inputAttributes.data();
     }
