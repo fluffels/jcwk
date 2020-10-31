@@ -246,6 +246,8 @@ void createPipeline(
     VkFrontFace frontFace,
     VulkanPipeline& pipeline
 ) {
+    bool isMeshPipeline = false;
+
     vector<VkPipelineShaderStageCreateInfo> shaderStages;
     for (auto& shader: shaders) {
         auto& shaderStage = shaderStages.emplace_back();
@@ -254,6 +256,10 @@ void createPipeline(
         shaderStage.stage = (VkShaderStageFlagBits)shader.reflect.shader_stage;
         shaderStage.module = shader.module;
         shaderStage.pName = "main";
+
+        if (shaderStage.stage == VK_SHADER_STAGE_MESH_BIT_NV) {
+            isMeshPipeline = true;
+        }
     }
 
     pipeline.inputBinding.binding = 0;
@@ -269,11 +275,13 @@ void createPipeline(
     VkPipelineVertexInputStateCreateInfo vertexInput = {};
     vertexInput.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInput.vertexBindingDescriptionCount = 1;
-    vertexInput.pVertexBindingDescriptions = &pipeline.inputBinding;
-    vertexInput.vertexAttributeDescriptionCount =
-        (uint32_t)pipeline.inputAttributes.size();
-    vertexInput.pVertexAttributeDescriptions = pipeline.inputAttributes.data();
+    if (!isMeshPipeline) {
+        vertexInput.vertexBindingDescriptionCount = 0;
+        vertexInput.pVertexBindingDescriptions = &pipeline.inputBinding;
+        vertexInput.vertexAttributeDescriptionCount = 0;
+            (uint32_t)pipeline.inputAttributes.size();
+        vertexInput.pVertexAttributeDescriptions = pipeline.inputAttributes.data();
+    }
     
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =
