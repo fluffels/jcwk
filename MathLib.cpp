@@ -48,6 +48,10 @@ inline void matrixTranslate(float x, float y, float z, float* m) {
     m[14] += z;
 }
 
+inline void matrixTranslate(Vec3 v, float* m) {
+    matrixTranslate(v.x, v.y, v.z, m);
+}
+
 inline void matrixMultiply(float* m, float* n, float* r) {
     for (int nIdx = 0; nIdx <= 12; nIdx += 4) {
         for (int mIdx = 0; mIdx <= 3; mIdx++) {
@@ -58,6 +62,48 @@ inline void matrixMultiply(float* m, float* n, float* r) {
             r++;
         }
     }
+}
+
+inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.y*b.z - a.z*b.y;
+    r.y = a.z*b.x - a.x*b.z;
+    r.z = a.x*b.y - a.y*b.x;
+}
+
+inline float vectorMagnitude(Vec3& v) {
+    float result = 0;
+
+    result += powf(v.x, 2);
+    result += powf(v.y, 2);
+    result += powf(v.z, 2);
+    result /= sqrtf(result);
+
+    return result;
+}
+
+inline void vectorNormalize(Vec3& v) {
+    float magnitude = vectorMagnitude(v);
+    v.x /= magnitude;
+    v.y /= magnitude;
+    v.z /= magnitude;
+}
+
+inline void vectorScale(float d, Vec3& v) {
+    v.x *= d;
+    v.y *= d;
+    v.z *= d;
+}
+
+inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.x + b.x;
+    r.y = a.y + b.y;
+    r.z = a.z + b.z;
+}
+
+inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    r.z = a.z - b.z;
 }
 
 inline float quaternionMagnitude(Quaternion& q) {
