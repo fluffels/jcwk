@@ -295,7 +295,7 @@ void createPipeline(
     VkViewport viewport = {};
     viewport.height = (float)vk.swap.extent.height;
     viewport.width = (float)vk.swap.extent.width;
-    viewport.minDepth = -1.f;
+    viewport.minDepth = 0.f;
     viewport.maxDepth = 1.f; 
     viewport.x = 0.f;
     viewport.y = 0.f;
