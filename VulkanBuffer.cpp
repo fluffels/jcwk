@@ -75,6 +75,18 @@ void createVulkanBufferView(
     ));
 }
 
+void createStorageBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+) {
+    auto usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+    createVulkanBuffer(device, queueFamily, usage, size, buffer);
+    allocateVulkanBuffer(device, memories, buffer);
+}
+
 void createUniformBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
@@ -143,6 +155,20 @@ void createTexelBuffer(
         VK_FORMAT_R32_SFLOAT,
         buffer
     );
+}
+
+void uploadStorageBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    void* data,
+    uint32_t size,
+    VulkanBuffer& buffer
+) {
+    createStorageBuffer(device, memories, queueFamily, size, buffer);
+    void* memory = mapMemory(device, buffer.handle, buffer.memory);
+        memcpy(memory, data, size);
+    unMapMemory(device, buffer.memory);
 }
 
 void uploadTexelBuffer(

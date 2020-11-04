@@ -49,6 +49,28 @@ void updateCombinedImageSampler(
     vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
 }
 
+void updateStorageBuffer(
+    VkDevice device,
+    VkDescriptorSet descriptorSet,
+    uint32_t binding,
+    VkBuffer buffer
+) {
+    VkDescriptorBufferInfo info;
+    info.buffer = buffer;
+    info.offset = 0;
+    info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet write = {};
+    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    write.descriptorCount = 1;
+    write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    write.dstBinding = binding;
+    write.dstSet = descriptorSet;
+    write.pBufferInfo = &info;
+
+    vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
+}
+
 void updateUniformTexelBuffer(
     VkDevice device,
     VkDescriptorSet descriptorSet,

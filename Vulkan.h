@@ -157,6 +157,13 @@ void createStagingBuffer(
     uint32_t size,
     VulkanBuffer& buffer
 );
+void createStorageBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+);
 void createTexelBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
@@ -165,6 +172,14 @@ void createTexelBuffer(
     VulkanBuffer& buffer
 );
 void uploadIndexBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    void* data,
+    uint32_t size,
+    VulkanBuffer& buffer
+);
+void uploadStorageBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     uint32_t queueFamily,
@@ -266,6 +281,12 @@ void updateCombinedImageSampler(
     uint32_t binding,
     VulkanSampler* samplers,
     uint32_t count
+);
+void updateStorageBuffer(
+    VkDevice device,
+    VkDescriptorSet descriptorSet,
+    uint32_t binding,
+    VkBuffer buffer
 );
 void updateUniformBuffer(
     VkDevice device,
