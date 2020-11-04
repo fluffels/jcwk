@@ -6,6 +6,13 @@ struct Vec3 {
     float z;
 };
 
+struct Vec4 {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
 struct Quaternion {
     float x;
     float y;
