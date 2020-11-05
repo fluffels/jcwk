@@ -4,6 +4,48 @@
 
 #include "MathLib.h"
 
+inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.y*b.z - a.z*b.y;
+    r.y = a.z*b.x - a.x*b.z;
+    r.z = a.x*b.y - a.y*b.x;
+}
+
+inline float vectorMagnitude(Vec3& v) {
+    float result = 0;
+
+    result += powf(v.x, 2);
+    result += powf(v.y, 2);
+    result += powf(v.z, 2);
+    result /= sqrtf(result);
+
+    return result;
+}
+
+inline void vectorNormalize(Vec3& v) {
+    float magnitude = vectorMagnitude(v);
+    v.x /= magnitude;
+    v.y /= magnitude;
+    v.z /= magnitude;
+}
+
+inline void vectorScale(float d, Vec3& v) {
+    v.x *= d;
+    v.y *= d;
+    v.z *= d;
+}
+
+inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.x + b.x;
+    r.y = a.y + b.y;
+    r.z = a.z + b.z;
+}
+
+inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+    r.z = a.z - b.z;
+}
+
 inline void matrixInit(float* m) {
     *m++ = 1;
     *m++ = 0;
@@ -64,46 +106,32 @@ inline void matrixMultiply(float* m, float* n, float* r) {
     }
 }
 
-inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
-    r.x = a.y*b.z - a.z*b.y;
-    r.y = a.z*b.x - a.x*b.z;
-    r.z = a.x*b.y - a.y*b.x;
-}
+inline void matrixView(Vec3 pos, Vec3 at, Vec3 down, float* m) {
+    matrixInit(m);
 
-inline float vectorMagnitude(Vec3& v) {
-    float result = 0;
+    Vec3 z;
+    vectorSub(at, pos, z);
+    vectorNormalize(z);
 
-    result += powf(v.x, 2);
-    result += powf(v.y, 2);
-    result += powf(v.z, 2);
-    result /= sqrtf(result);
+    Vec3 x;
+    vectorCross(down, z, x);
+    vectorNormalize(x);
 
-    return result;
-}
+    Vec3 y;
+    vectorCross(z, x, y);
+    vectorNormalize(y);
 
-inline void vectorNormalize(Vec3& v) {
-    float magnitude = vectorMagnitude(v);
-    v.x /= magnitude;
-    v.y /= magnitude;
-    v.z /= magnitude;
-}
+    m[0] = x.x;
+    m[1] = x.y;
+    m[2] = x.z;
+    m[4] = y.x;
+    m[5] = y.y;
+    m[6] = y.z;
+    m[8] = z.x;
+    m[9] = z.y;
+    m[10] = z.z;
 
-inline void vectorScale(float d, Vec3& v) {
-    v.x *= d;
-    v.y *= d;
-    v.z *= d;
-}
-
-inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
-    r.x = a.x + b.x;
-    r.y = a.y + b.y;
-    r.z = a.z + b.z;
-}
-
-inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
-    r.x = a.x - b.x;
-    r.y = a.y - b.y;
-    r.z = a.z - b.z;
+    matrixTranslate(-pos.x, -pos.y, -pos.z, m);
 }
 
 inline float quaternionMagnitude(Quaternion& q) {
