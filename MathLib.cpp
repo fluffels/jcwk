@@ -155,6 +155,13 @@ inline void matrixView(Vec3 pos, Vec3 at, Vec3 down, float* m) {
     matrixTranslate(-pos.x, -pos.y, -pos.z, m);
 }
 
+inline void quaternionInit(Quaternion& q) {
+    q.x = 0;
+    q.y = 0;
+    q.z = 0;
+    q.w = 1;
+}
+
 inline float quaternionMagnitude(Quaternion& q) {
     float result = 0;
 
