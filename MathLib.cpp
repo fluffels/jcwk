@@ -106,6 +106,27 @@ inline void matrixMultiply(float* m, float* n, float* r) {
     }
 }
 
+inline void matrixProjection(
+    uint32_t screenWidth,
+    uint32_t screenHeight,
+    float fov,
+    float farz,
+    float nearz,
+    float* m
+) {
+    matrixInit(m);
+
+    const float ar = screenWidth / (float)screenHeight;
+    const float halfFOV = fov / 2.f;
+    const float halfTanFOV = tanf(halfFOV);
+
+    m[0] = 1 / (ar * halfTanFOV);
+    m[5] = 1 / halfTanFOV;
+    m[10] = 1 / (farz - nearz);
+    m[11] = 1;
+    m[14] = -nearz / (farz - nearz);
+}
+
 inline void matrixView(Vec3 pos, Vec3 at, Vec3 down, float* m) {
     matrixInit(m);
 
