@@ -127,11 +127,10 @@ inline void matrixProjection(
     m[14] = -nearz / (farz - nearz);
 }
 
-inline void matrixView(Vec3 pos, Vec3 at, Vec3 down, float* m) {
+inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
     matrixInit(m);
 
-    Vec3 z;
-    vectorSub(at, pos, z);
+    Vec3 z = view;
     vectorNormalize(z);
 
     Vec3 x;
