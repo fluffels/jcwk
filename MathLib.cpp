@@ -4,17 +4,17 @@
 
 #include "MathLib.h"
 
-inline float toRadians(float d) {
+static inline float toRadians(float d) {
     return (d / 180.f) * PI;
 }
 
-inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
+static inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.y*b.z - a.z*b.y;
     r.y = a.z*b.x - a.x*b.z;
     r.z = a.x*b.y - a.y*b.x;
 }
 
-inline float vectorMagnitude(Vec3& v) {
+static inline float vectorMagnitude(Vec3& v) {
     float result = 0;
 
     result += powf(v.x, 2);
@@ -25,32 +25,32 @@ inline float vectorMagnitude(Vec3& v) {
     return result;
 }
 
-inline void vectorNormalize(Vec3& v) {
+static inline void vectorNormalize(Vec3& v) {
     float magnitude = vectorMagnitude(v);
     v.x /= magnitude;
     v.y /= magnitude;
     v.z /= magnitude;
 }
 
-inline void vectorScale(float d, Vec3& v) {
+static inline void vectorScale(float d, Vec3& v) {
     v.x *= d;
     v.y *= d;
     v.z *= d;
 }
 
-inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
+static inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x + b.x;
     r.y = a.y + b.y;
     r.z = a.z + b.z;
 }
 
-inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
+static inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x - b.x;
     r.y = a.y - b.y;
     r.z = a.z - b.z;
 }
 
-inline void matrixInit(float* m) {
+static inline void matrixInit(float* m) {
     *m++ = 1;
     *m++ = 0;
     *m++ = 0;
@@ -72,33 +72,33 @@ inline void matrixInit(float* m) {
     *m++ = 1;
 }
 
-inline void matrixCopy(float* s, float* d) {
+static inline void matrixCopy(float* s, float* d) {
     for (int i = 0; i < 16; i++) {
         *d++ = *s++;
     }
 }
 
-inline void matrixScale(float x, float y, float z, float* m) {
+static inline void matrixScale(float x, float y, float z, float* m) {
     m[0] *= x;
     m[5] *= y;
     m[10] *= z;
 }
 
-inline void matrixScale(float s, float* m) {
+static inline void matrixScale(float s, float* m) {
     matrixScale(s, s, s, m);
 }
 
-inline void matrixTranslate(float x, float y, float z, float* m) {
+static inline void matrixTranslate(float x, float y, float z, float* m) {
     m[12] += x;
     m[13] += y;
     m[14] += z;
 }
 
-inline void matrixTranslate(Vec3 v, float* m) {
+static inline void matrixTranslate(Vec3 v, float* m) {
     matrixTranslate(v.x, v.y, v.z, m);
 }
 
-inline void matrixMultiply(float* m, float* n, float* r) {
+static inline void matrixMultiply(float* m, float* n, float* r) {
     for (int nIdx = 0; nIdx <= 12; nIdx += 4) {
         for (int mIdx = 0; mIdx <= 3; mIdx++) {
             *r = 0;
@@ -110,7 +110,7 @@ inline void matrixMultiply(float* m, float* n, float* r) {
     }
 }
 
-inline void matrixProjection(
+static inline void matrixProjection(
     uint32_t screenWidth,
     uint32_t screenHeight,
     float fov,
@@ -131,7 +131,7 @@ inline void matrixProjection(
     m[14] = -nearz / (farz - nearz);
 }
 
-inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
+static inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
     matrixInit(m);
 
     Vec3 z = view;
@@ -158,14 +158,14 @@ inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
     matrixTranslate(-pos.x, -pos.y, -pos.z, m);
 }
 
-inline void quaternionInit(Quaternion& q) {
+static inline void quaternionInit(Quaternion& q) {
     q.x = 0;
     q.y = 0;
     q.z = 0;
     q.w = 1;
 }
 
-inline float quaternionMagnitude(Quaternion& q) {
+static inline float quaternionMagnitude(Quaternion& q) {
     float result = 0;
 
     result += powf(q.w, 2);
@@ -177,11 +177,11 @@ inline float quaternionMagnitude(Quaternion& q) {
     return result;
 }
 
-inline void quaternionLog(Quaternion& q) {
+static inline void quaternionLog(Quaternion& q) {
     LOG(INFO) << quaternionMagnitude(q) << " " << q.w << " " << q.x << " " << q.y << " " << q.z;
 }
 
-inline void quaternionNormalize(Quaternion& q) {
+static inline void quaternionNormalize(Quaternion& q) {
     float magnitude = quaternionMagnitude(q);
     q.w /= magnitude;
     q.x /= magnitude;
@@ -189,7 +189,7 @@ inline void quaternionNormalize(Quaternion& q) {
     q.z /= magnitude;
 }
 
-inline Quaternion quaternionMultiply(Quaternion& q1, Quaternion& q2) {
+static inline Quaternion quaternionMultiply(Quaternion& q1, Quaternion& q2) {
     Quaternion r;
 
     r.w = q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z;
@@ -200,7 +200,7 @@ inline Quaternion quaternionMultiply(Quaternion& q1, Quaternion& q2) {
     return r;
 }
 
-inline Quaternion quaternionFromAngleAxis(float x, float y, float z, float angle) {
+static inline Quaternion quaternionFromAngleAxis(float x, float y, float z, float angle) {
     Quaternion r;
 
     r.w = cosf(angle/2);
@@ -211,7 +211,7 @@ inline Quaternion quaternionFromAngleAxis(float x, float y, float z, float angle
     return r;
 }
 
-inline Quaternion quaternionInverse(Quaternion q) {
+static inline Quaternion quaternionInverse(Quaternion q) {
     Quaternion result;
 
     result.x = -q.x;
@@ -222,19 +222,19 @@ inline Quaternion quaternionInverse(Quaternion q) {
     return result;
 }
 
-inline void quaternionRotate(Quaternion q, Quaternion& p) {
+static inline void quaternionRotate(Quaternion q, Quaternion& p) {
     Quaternion qi = quaternionInverse(q);
     p = quaternionMultiply(q, p);
     p = quaternionMultiply(p, qi);
 }
 
-inline void quaternionUnrotate(Quaternion q, Quaternion& p) {
+static inline void quaternionUnrotate(Quaternion q, Quaternion& p) {
     Quaternion qi = quaternionInverse(q);
     p = quaternionMultiply(qi, p);
     p = quaternionMultiply(p, q);
 }
 
-void moveAlongQuaternion(float d, Quaternion q, Vec4& p) {
+static void moveAlongQuaternion(float d, Quaternion q, Vec4& p) {
     Quaternion dir = {};
     dir.z = 1;
     quaternionUnrotate(q, dir);
@@ -243,7 +243,7 @@ void moveAlongQuaternion(float d, Quaternion q, Vec4& p) {
     p.z += d * dir.z;
 }
 
-void movePerpendicularToQuaternion(float d, Quaternion q, Vec4& p) {
+static void movePerpendicularToQuaternion(float d, Quaternion q, Vec4& p) {
     Quaternion dir = {};
     dir.x = 1;
     quaternionUnrotate(q, dir);
@@ -252,19 +252,19 @@ void movePerpendicularToQuaternion(float d, Quaternion q, Vec4& p) {
     p.z += d * dir.z;
 }
 
-void rotateQuaternionY(float d, Quaternion& q) {
+static void rotateQuaternionY(float d, Quaternion& q) {
     auto rad = toRadians(d);
     auto delta = quaternionFromAngleAxis(0, 1, 0, rad);
     q = quaternionMultiply(delta, q);
 }
 
-void rotateQuaternionX(float d, Quaternion& q) {
+static void rotateQuaternionX(float d, Quaternion& q) {
     auto rad = toRadians(d);
     auto delta = quaternionFromAngleAxis(1, 0, 0, rad);
     q = quaternionMultiply(delta, q);
 }
 
-inline void quaternionToMatrix(Quaternion& q, float* m) {
+static inline void quaternionToMatrix(Quaternion& q, float* m) {
     *m++ = powf(q.w, 2) + powf(q.x, 2) - powf(q.y, 2) - powf(q.z, 2);
     *m++ = 2*q.x*q.y + 2*q.w*q.z;
     *m++ = 2*q.x*q.z - 2*q.w*q.y;
@@ -286,7 +286,7 @@ inline void quaternionToMatrix(Quaternion& q, float* m) {
     *m++ = 1;
 }
 
-inline void getXAxis(Quaternion& q, float* v) {
+static inline void getXAxis(Quaternion& q, float* v) {
     float m[16];
     quaternionToMatrix(q, m);
     v[0] = m[0];
@@ -294,7 +294,7 @@ inline void getXAxis(Quaternion& q, float* v) {
     v[2] = m[8];
 }
 
-inline void getZAxis(Quaternion& q, float* v) {
+static inline void getZAxis(Quaternion& q, float* v) {
     float m[16];
     quaternionToMatrix(q, m);
     v[0] = m[2];
