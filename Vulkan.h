@@ -67,7 +67,7 @@ struct Vulkan {
     VulkanSwapChain swap;
 
     VulkanImage depth;
-    VulkanBuffer mvp;
+    VulkanBuffer uniforms;
 
     VkCommandPool cmdPool;
     VkCommandPool cmdPoolTransient;

@@ -390,7 +390,7 @@ void initVK(Vulkan& vk) {
     getFunctions(vk);
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
-    createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.mvp);
+    createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
     createRenderPass(vk, true, vk.renderPass);
     createRenderPass(vk, false, vk.renderPassNoClear);
     vk.depth = createVulkanDepthBuffer(
