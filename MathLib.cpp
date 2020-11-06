@@ -4,6 +4,10 @@
 
 #include "MathLib.h"
 
+inline float toRadians(float d) {
+    return (d / 180.f) * PI;
+}
+
 inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.y*b.z - a.z*b.y;
     r.y = a.z*b.x - a.x*b.z;
