@@ -1,6 +1,18 @@
 #pragma once
 
+#include <cstdint>
+
 #define PI 3.14159265358979323846f
+
+struct Vec2i {
+    int32_t x;
+    int32_t y;
+};
+
+struct Vec2 {
+    float x;
+    float y;
+};
 
 struct Vec3 {
     float x;
