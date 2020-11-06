@@ -234,6 +234,36 @@ inline void quaternionUnrotate(Quaternion q, Quaternion& p) {
     p = quaternionMultiply(p, q);
 }
 
+void moveAlongQuaternion(float d, Quaternion q, Vec4& p) {
+    Quaternion dir = {};
+    dir.z = 1;
+    quaternionUnrotate(q, dir);
+    p.x += d * dir.x;
+    p.y += d * dir.y;
+    p.z += d * dir.z;
+}
+
+void movePerpendicularToQuaternion(float d, Quaternion q, Vec4& p) {
+    Quaternion dir = {};
+    dir.x = 1;
+    quaternionUnrotate(q, dir);
+    p.x += d * dir.x;
+    p.y += d * dir.y;
+    p.z += d * dir.z;
+}
+
+void rotateQuaternionY(float d, Quaternion& q) {
+    auto rad = toRadians(d);
+    auto delta = quaternionFromAngleAxis(0, 1, 0, rad);
+    q = quaternionMultiply(delta, q);
+}
+
+void rotateQuaternionX(float d, Quaternion& q) {
+    auto rad = toRadians(d);
+    auto delta = quaternionFromAngleAxis(1, 0, 0, rad);
+    q = quaternionMultiply(delta, q);
+}
+
 inline void quaternionToMatrix(Quaternion& q, float* m) {
     *m++ = powf(q.w, 2) + powf(q.x, 2) - powf(q.y, 2) - powf(q.z, 2);
     *m++ = 2*q.x*q.y + 2*q.w*q.z;
