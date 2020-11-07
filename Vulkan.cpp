@@ -5,11 +5,20 @@
 
 #include "easylogging++.h"
 
-#include "Util.h"
 #include "Vulkan.h"
 
 using std::runtime_error;
 using std::string;
+
+const char**
+stringVectorToC(const vector<string>& v) {
+    auto count = v.size();
+    auto strings = new const char*[count];
+    for (unsigned i = 0; i < count; i++) {
+        strings[i] = v[i].c_str();
+    }
+    return strings;
+}
 
 void checkVersion(uint32_t version) {
     auto major = VK_VERSION_MAJOR(version);
@@ -411,5 +420,6 @@ void initVK(Vulkan& vk) {
 #include "VulkanMemory.cpp"
 #include "VulkanMesh.cpp"
 #include "VulkanPipeline.cpp"
+#include "VulkanPresent.cpp"
 #include "VulkanSwapChain.cpp"
 #include "VulkanSynch.cpp"

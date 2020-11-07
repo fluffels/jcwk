@@ -7,7 +7,6 @@
 #include <io.h>
 #include <map>
 
-#include "util.h"
 #include "FileSystem.h"
 #include "Vulkan.h"
 

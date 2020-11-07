@@ -157,6 +157,25 @@ void createTexelBuffer(
     );
 }
 
+void updateBuffer(
+    Vulkan& vk,
+    VulkanBuffer& buffer,
+    void* data,
+    size_t length
+) {
+    auto dst = mapMemory(vk.device, buffer.handle, buffer.memory);
+        memcpy(dst, data, length);
+    unMapMemory(vk.device, buffer.memory);
+}
+
+void updateUniforms(
+    Vulkan& vk,
+    void* data,
+    size_t length
+) {
+    updateBuffer(vk, vk.uniforms, data, length);
+}
+
 void uploadStorageBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,

@@ -171,6 +171,17 @@ void createTexelBuffer(
     uint32_t size,
     VulkanBuffer& buffer
 );
+void updateBuffer(
+    Vulkan& vk,
+    VulkanBuffer& buffer,
+    void* data,
+    size_t length
+);
+void updateUniforms(
+    Vulkan& vk,
+    void* data,
+    size_t length
+);
 void uploadIndexBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
@@ -318,4 +329,10 @@ void uploadMesh(
     void* indices,
     uint32_t indicesSize,
     VulkanMesh& mesh
+);
+
+// Present
+void present(
+    Vulkan& vk,
+    vector<vector<VkCommandBuffer>>& cmdss
 );
