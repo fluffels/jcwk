@@ -29,8 +29,8 @@ void checkVersion(uint32_t version) {
                                       << minor << "."
                                       << patch;
     
-    if ((major < 1) || (minor < 1) || (patch < 126)) {
-        throw runtime_error("you need at least Vulkan 1.1.126");
+    if ((major < 1) || (minor < 2) || (patch < 141)) {
+        throw runtime_error("you need at least Vulkan 1.2.141");
     }
 }
 
@@ -127,6 +127,10 @@ void createVKInstance(Vulkan& vk) {
 
     vk.extensions.insert(vk.extensions.begin(), VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     vk.extensions.insert(vk.extensions.begin(), VK_KHR_SURFACE_EXTENSION_NAME);
+    vk.extensions.insert(
+        vk.extensions.begin(),
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
+    );
 
     for (auto& requestedExtension: vk.extensions) {
         bool found = false;
@@ -146,6 +150,7 @@ void createVKInstance(Vulkan& vk) {
 
     VkApplicationInfo app = {};
     app.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    app.apiVersion = VK_API_VERSION_1_2;
 
     VkInstanceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -158,6 +163,7 @@ void createVKInstance(Vulkan& vk) {
     createInfo.enabledExtensionCount = vk.extensions.size();
     auto enabledExtensionNames = stringVectorToC(vk.extensions);
     createInfo.ppEnabledExtensionNames = enabledExtensionNames;
+
     
     VkResult result = vkCreateInstance(&createInfo, nullptr, &vk.handle);
     if (result == VK_ERROR_INITIALIZATION_FAILED) {
