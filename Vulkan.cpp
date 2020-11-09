@@ -163,7 +163,6 @@ void createVKInstance(Vulkan& vk) {
     createInfo.enabledExtensionCount = vk.extensions.size();
     auto enabledExtensionNames = stringVectorToC(vk.extensions);
     createInfo.ppEnabledExtensionNames = enabledExtensionNames;
-
     
     VkResult result = vkCreateInstance(&createInfo, nullptr, &vk.handle);
     if (result == VK_ERROR_INITIALIZATION_FAILED) {
@@ -226,6 +225,7 @@ void pickGPU(Vulkan& vk) {
             continue;
         }
 
+#ifdef VULKAN_MESH_SHADER
         {
             VkPhysicalDeviceMeshShaderFeaturesNV meshFeatures = {};
             meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
@@ -242,6 +242,7 @@ void pickGPU(Vulkan& vk) {
                 LOG(INFO) << "gpu does not support mesh shaders";
             }
         }
+#endif
 
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
@@ -307,6 +308,7 @@ void createDevice(Vulkan& vk) {
 
     vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
+#ifdef VULKAN_MESH_SHADER
     if (vk.supportsMeshShaders) {
         extensions.push_back(VK_NV_MESH_SHADER_EXTENSION_NAME);
     }
@@ -322,10 +324,13 @@ void createDevice(Vulkan& vk) {
     if (vk.supportsMeshShaders) {
         features.pNext = &meshFeatures;
     }
+#endif
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+#ifdef VULKAN_MESH_SHADER
     createInfo.pNext = &features;
+#endif
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(
         queueCreateInfos.size()
     );
@@ -402,7 +407,9 @@ void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
 void initVK(Vulkan& vk) {
     pickGPU(vk);
     createDevice(vk);
+#ifdef VULKAN_MESH_SHADER
     getFunctions(vk);
+#endif
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
