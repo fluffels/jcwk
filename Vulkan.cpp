@@ -243,6 +243,28 @@ void pickGPU(Vulkan& vk) {
             }
         }
 #endif
+#ifdef VULKAN_PERFORMANCE_COUNTERS
+        {
+            VkPhysicalDevicePerformanceQueryFeaturesKHR queryFeatures = {};
+            queryFeatures.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR;
+            
+            VkPhysicalDeviceFeatures2 features = {};
+            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+            features.pNext = &queryFeatures;
+
+            vkGetPhysicalDeviceFeatures2(gpu, &features);
+            vk.supportsQueryPools =
+                queryFeatures.performanceCounterQueryPools
+                && queryFeatures.performanceCounterMultipleQueryPools;
+            if (vk.supportsQueryPools) {
+                LOG(INFO) << "gpu supports query pools";
+            } else {
+                LOG(INFO) << "gpu does not support query pools";
+            }
+        }
+#endif
+
 
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
