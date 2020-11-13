@@ -448,13 +448,13 @@ void initVK(Vulkan& vk) {
     vk.cmdPoolTransient = createCommandPool(vk.device, vk.queueFamily, true);
 }
 
-#include "VulkanBuffer.cpp"
-#include "VulkanCommandBuffer.cpp"
-#include "VulkanDescriptors.cpp"
-#include "VulkanImage.cpp"
-#include "VulkanMemory.cpp"
-#include "VulkanMesh.cpp"
-#include "VulkanPipeline.cpp"
-#include "VulkanPresent.cpp"
-#include "VulkanSwapChain.cpp"
-#include "VulkanSynch.cpp"
+#include "Vulkan/Buffer.cpp"
+#include "Vulkan/CommandBuffer.cpp"
+#include "Vulkan/Descriptors.cpp"
+#include "Vulkan/Image.cpp"
+#include "Vulkan/Memory.cpp"
+#include "Vulkan/Mesh.cpp"
+#include "Vulkan/Pipeline.cpp"
+#include "Vulkan/Present.cpp"
+#include "Vulkan/SwapChain.cpp"
+#include "Vulkan/Synch.cpp"
