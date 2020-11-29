@@ -104,26 +104,30 @@ void getImages(Vulkan& vk) {
     }
 }
 
+void createSwapImageView(Vulkan& vk, VkImage image, VkImageView& view) {
+    VkImageViewCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    createInfo.image = image;
+    createInfo.format = vk.swap.format;
+    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    createInfo.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+    createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+    createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    checkSuccess(vkCreateImageView(
+        vk.device,
+        &createInfo,
+        nullptr,
+        &view
+    ));
+}
+
 void createViews(Vulkan& vk) {
     for (auto& image: vk.swap.images) {
-        VkImageViewCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = image.handle;
-        createInfo.format = vk.swap.format;
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-        createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        checkSuccess(vkCreateImageView(
-            vk.device,
-            &createInfo,
-            nullptr,
-            &image.view
-        ));
+        createSwapImageView(vk, image.handle, image.view);
     }
 }
 
