@@ -437,11 +437,12 @@ void initVK(Vulkan& vk) {
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
     createRenderPass(vk, true, vk.renderPass);
     createRenderPass(vk, false, vk.renderPassNoClear);
-    vk.depth = createVulkanDepthBuffer(
+    createVulkanDepthBuffer(
         vk.device,
         vk.memories,
         vk.swap.extent,
-        vk.queueFamily
+        vk.queueFamily,
+        vk.depth
     );
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);

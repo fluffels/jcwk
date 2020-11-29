@@ -105,12 +105,13 @@ void getImages(Vulkan& vk) {
 }
 
 void createSwapImageView(Vulkan& vk, VkImage image, VkImageView& view) {
-    view = createView(
+    createView(
         vk.device,
         image,
         VK_IMAGE_VIEW_TYPE_2D,
         vk.swap.format,
-        VK_IMAGE_ASPECT_COLOR_BIT
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        view
     );
 }
 

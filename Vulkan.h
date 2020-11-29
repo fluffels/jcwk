@@ -235,23 +235,26 @@ void createCommandBuffers(
 );
 
 // Images & Samplers
-VulkanImage createVulkanDepthBuffer(
+void createVulkanDepthBuffer(
     VkDevice,
     VkPhysicalDeviceMemoryProperties&,
     VkExtent2D,
-    uint32_t
+    uint32_t,
+    VulkanImage&
 );
-VulkanSampler createVulkanSampler2D(
+void createVulkanSampler2D(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler&
 );
-VulkanSampler createVulkanSamplerCube(
+void createVulkanSamplerCube(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler&
 );
 void uploadTexture(
     VkDevice device,

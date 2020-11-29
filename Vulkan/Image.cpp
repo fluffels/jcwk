@@ -4,34 +4,30 @@
 
 using std::runtime_error;
 
-VkDeviceMemory allocateVulkanImage(
+void allocateVulkanImage(
     VkDevice device,
     VkDeviceSize size,
     uint32_t memoryType,
-    VkImage image
+    VkImage image,
+    VkDeviceMemory& memory
 ) {
     VkMemoryAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocateInfo.allocationSize = size;
     allocateInfo.memoryTypeIndex = memoryType;
     
-    VkDeviceMemory memory;
     auto result = vkAllocateMemory(
         device,
         &allocateInfo,
         nullptr,
         &memory
     );
-    if (result != VK_SUCCESS) {
-        throw runtime_error("could not allocate memory");
-    }
+    checkSuccess(result);
 
     vkBindImageMemory(device, image, memory, 0);
-
-    return memory;
 }
 
-VkImage createImage(
+void createImage(
     VkDevice device,
     VkImageType type,
     VkExtent2D extent,
@@ -39,10 +35,9 @@ VkImage createImage(
     uint32_t family,
     VkFormat format,
     VkImageUsageFlags usage,
-    VkImageCreateFlags flags
+    VkImageCreateFlags flags,
+    VkImage& image
 ) {
-    VkImage result;
-
     VkImageCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     createInfo.flags = flags;
@@ -59,23 +54,18 @@ VkImage createImage(
     createInfo.usage = usage;
     createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 
-    auto code = vkCreateImage(device, &createInfo, nullptr, &result);
-    if (code != VK_SUCCESS) {
-        throw runtime_error("could not create image");
-    }
-
-    return result;
+    auto code = vkCreateImage(device, &createInfo, nullptr, &image);
+    checkSuccess(code);
 }
 
-VkImageView createView(
+void createView(
     VkDevice device,
     VkImage image,
     VkImageViewType type,
     VkFormat format,
-    VkImageAspectFlags aspectMask
+    VkImageAspectFlags aspectMask,
+    VkImageView& view
 ) {
-    VkImageView result;
-
     VkImageViewCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -89,13 +79,11 @@ VkImageView createView(
     createInfo.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
     createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 
-    auto code = vkCreateImageView(device, &createInfo, nullptr, &result);
+    auto code = vkCreateImageView(device, &createInfo, nullptr, &view);
     checkSuccess(code);
-
-    return result;
 }
 
-VulkanImage createVulkanImage(
+void createVulkanImage(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkImageType type,
@@ -106,12 +94,11 @@ VulkanImage createVulkanImage(
     VkFormat format,
     VkImageUsageFlags usage,
     VkImageAspectFlags aspectMask,
-    bool hostVisible = false,
-    VkImageCreateFlags imageCreateFlags = 0
+    bool hostVisible,
+    VkImageCreateFlags imageCreateFlags,
+    VulkanImage& image
 ) {
-    VulkanImage result = {};
-
-    result.handle = createImage(
+    createImage(
         device,
         type,
         extent,
@@ -119,20 +106,24 @@ VulkanImage createVulkanImage(
         family,
         format,
         usage,
-        imageCreateFlags
+        imageCreateFlags,
+        image.handle
     );
 
-    auto reqs = getMemoryRequirements(device, result.handle);
+    auto reqs = getMemoryRequirements(device, image.handle);
     auto flags =
         hostVisible? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : 0;
     auto memType = selectMemoryTypeIndex(memories, reqs, flags);
-    result.memory = allocateVulkanImage(device, reqs.size, memType, result.handle);
+    allocateVulkanImage(device, reqs.size, memType, image.handle, image.memory);
 
-    result.view = createView(
-        device, result.handle, viewType, format, aspectMask
+    createView(
+        device,
+        image.handle,
+        viewType,
+        format,
+        aspectMask,
+        image.view
     );
-
-    return result;
 }
 
 void destroyVulkanImage(VkDevice device, VulkanImage image) {
@@ -146,13 +137,14 @@ void destroyVulkanSampler(VkDevice device, VulkanSampler sampler) {
     destroyVulkanImage(device, sampler.image);
 }
 
-VulkanImage createVulkanDepthBuffer(
+void createVulkanDepthBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanImage& image
 ) {
-    auto result = createVulkanImage(
+    createVulkanImage(
         device,
         memories,
         VK_IMAGE_TYPE_2D,
@@ -162,12 +154,14 @@ VulkanImage createVulkanDepthBuffer(
         family,
         VK_FORMAT_D32_SFLOAT,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_IMAGE_ASPECT_DEPTH_BIT
+        VK_IMAGE_ASPECT_DEPTH_BIT,
+        false,
+        0,
+        image
     );
-    return result;
 }
 
-VulkanSampler createVulkanSampler(
+void createVulkanSampler(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkImageType type,
@@ -175,11 +169,10 @@ VulkanSampler createVulkanSampler(
     VkExtent2D extent,
     uint32_t layerCount,
     uint32_t family,
-    VkImageCreateFlags imageCreateFlags = (VkImageCreateFlags)0
+    VkImageCreateFlags imageCreateFlags,
+    VulkanSampler& sampler
 ) {
-    VulkanSampler result = {};
-
-    result.image = createVulkanImage(
+    createVulkanImage(
         device,
         memories,
         type,
@@ -191,7 +184,8 @@ VulkanSampler createVulkanSampler(
         VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
         false,
-        imageCreateFlags
+        imageCreateFlags,
+        sampler.image
     );
 
     VkSamplerCreateInfo createInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
@@ -209,40 +203,38 @@ VulkanSampler createVulkanSampler(
     // createInfo.maxLod = ;
     // createInfo.mipLodBias = ;
 
-    auto code = vkCreateSampler(device, &createInfo, nullptr, &result.handle);
-    if (code != VK_SUCCESS) {
-        throw runtime_error("could not create sampler");
-    }
-
-    return result;
+    auto code = vkCreateSampler(device, &createInfo, nullptr, &sampler.handle);
+    checkSuccess(code);
 }
 
-VulkanSampler createVulkanSampler2D(
+void createVulkanSampler2D(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler& sampler
 ) {
-    return createVulkanSampler(
+    createVulkanSampler(
         device,
         memories,
         VK_IMAGE_TYPE_2D,
         VK_IMAGE_VIEW_TYPE_2D,
         extent,
         1,
-        family
+        family,
+        0,
+        sampler
     );
 }
 
-VulkanSampler createVulkanSamplerCube(
+void createVulkanSamplerCube(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler& sampler
 ) {
-    VulkanImage result = {};
-
-    return createVulkanSampler(
+    createVulkanSampler(
         device,
         memories,
         VK_IMAGE_TYPE_2D,
@@ -250,7 +242,8 @@ VulkanSampler createVulkanSamplerCube(
         extent,
         6,
         family,
-        VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+        VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+        sampler
     );
 }
 
@@ -281,8 +274,8 @@ void uploadTexture(
         memcpy(dst, data, size);
     unMapMemory(device, staging.memory);
 
-    sampler = createVulkanSampler2D(
-        device, memories, extent, queueFamily
+    createVulkanSampler2D(
+        device, memories, extent, queueFamily, sampler
     );
     auto& image = sampler.image;
 
