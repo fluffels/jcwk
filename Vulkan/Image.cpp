@@ -82,18 +82,15 @@ VkImageView createView(
     createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
     createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
     createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.viewType = type;
-    createInfo.format = format;
     createInfo.image = image;
+    createInfo.format = format;
+    createInfo.viewType = type;
     createInfo.subresourceRange.aspectMask = aspectMask;
-    createInfo.subresourceRange.baseArrayLayer = 0;
     createInfo.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
     createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 
     auto code = vkCreateImageView(device, &createInfo, nullptr, &result);
-    if (code != VK_SUCCESS) {
-        throw runtime_error("could not create image view");  
-    }
+    checkSuccess(code);
 
     return result;
 }
