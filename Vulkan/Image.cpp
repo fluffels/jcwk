@@ -58,6 +58,29 @@ void createImage(
     checkSuccess(code);
 }
 
+void createSampler(
+    VkDevice device,
+    VkSampler sampler
+) {
+    VkSamplerCreateInfo createInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
+    createInfo.magFilter = VK_FILTER_LINEAR;
+    createInfo.minFilter = VK_FILTER_LINEAR;
+    createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    // TODO(jan): Enable anisotropic filtering.
+    createInfo.anisotropyEnable = VK_FALSE;
+    // createInfo.maxAnisotropy = ;
+    createInfo.compareEnable = VK_FALSE;
+    // createInfo.minLod = ;
+    // createInfo.maxLod = ;
+    // createInfo.mipLodBias = ;
+
+    auto code = vkCreateSampler(device, &createInfo, nullptr, &sampler);
+    checkSuccess(code);
+}
+
 void createView(
     VkDevice device,
     VkImage image,
@@ -187,24 +210,10 @@ void createVulkanSampler(
         imageCreateFlags,
         sampler.image
     );
-
-    VkSamplerCreateInfo createInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
-    createInfo.magFilter = VK_FILTER_LINEAR;
-    createInfo.minFilter = VK_FILTER_LINEAR;
-    createInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
-    createInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    createInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    createInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-    // TODO(jan): Enable anisotropic filtering.
-    createInfo.anisotropyEnable = VK_FALSE;
-    // createInfo.maxAnisotropy = ;
-    createInfo.compareEnable = VK_FALSE;
-    // createInfo.minLod = ;
-    // createInfo.maxLod = ;
-    // createInfo.mipLodBias = ;
-
-    auto code = vkCreateSampler(device, &createInfo, nullptr, &sampler.handle);
-    checkSuccess(code);
+    createSampler(
+        device,
+        sampler.handle
+    );
 }
 
 void createVulkanSampler2D(
@@ -244,6 +253,35 @@ void createVulkanSamplerCube(
         family,
         VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
         sampler
+    );
+}
+
+void createPrepassImage(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VulkanSampler& sampler
+) {
+    createVulkanImage(
+        device,
+        memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_2D,
+        extent,
+        1,
+        family,
+        format,
+        VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        false,
+        0,
+        sampler.image
+    );
+    createSampler(
+        device,
+        sampler.handle
     );
 }
 

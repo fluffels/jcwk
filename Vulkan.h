@@ -243,6 +243,14 @@ void createCommandBuffers(
 );
 
 // Images & Samplers
+void createPrepassImage(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VulkanSampler& sampler
+);
 void createVulkanDepthBuffer(
     VkDevice,
     VkPhysicalDeviceMemoryProperties&,
