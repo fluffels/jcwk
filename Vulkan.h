@@ -129,6 +129,14 @@ void unMapMemory(VkDevice, VkDeviceMemory);
 // Synchronization
 VkSemaphore createSemaphore(VkDevice device);
 
+// Render Pass
+void createRenderPass(
+    Vulkan& vk,
+    bool clear,
+    bool prepass,
+    VkRenderPass& renderPass
+);
+
 // Buffers
 void createUniformBuffer(
     VkDevice device,
