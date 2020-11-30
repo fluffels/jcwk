@@ -364,26 +364,41 @@ void createDevice(Vulkan& vk) {
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
 }
 
-void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
+void createRenderPass(
+    Vulkan& vk,
+    bool clear,
+    bool prepass,
+    VkRenderPass& renderPass
+) {
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription& color = attachments.emplace_back();
     color.format = vk.swap.format;
     color.samples = VK_SAMPLE_COUNT_1_BIT;
-    color.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    color.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    color.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    color.finalLayout = prepass
+        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     
     VkAttachmentDescription& depth = attachments.emplace_back();
     depth.format = VK_FORMAT_D32_SFLOAT;
     depth.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    depth.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     depth.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depth.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     vector<VkAttachmentReference> colorReferences;
@@ -435,8 +450,8 @@ void initVK(Vulkan& vk) {
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
-    createRenderPass(vk, true, vk.renderPass);
-    createRenderPass(vk, false, vk.renderPassNoClear);
+    createRenderPass(vk, true, false, vk.renderPass);
+    createRenderPass(vk, false, false, vk.renderPassNoClear);
     createVulkanDepthBuffer(
         vk.device,
         vk.memories,
