@@ -60,7 +60,7 @@ void createImage(
 
 void createSampler(
     VkDevice device,
-    VkSampler sampler
+    VkSampler& sampler
 ) {
     VkSamplerCreateInfo createInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
     createInfo.magFilter = VK_FILTER_LINEAR;
