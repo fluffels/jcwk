@@ -243,6 +243,28 @@ void pickGPU(Vulkan& vk) {
             }
         }
 #endif
+#ifdef VULKAN_PERFORMANCE_COUNTERS
+        {
+            VkPhysicalDevicePerformanceQueryFeaturesKHR queryFeatures = {};
+            queryFeatures.sType =
+                VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PERFORMANCE_QUERY_FEATURES_KHR;
+            
+            VkPhysicalDeviceFeatures2 features = {};
+            features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
+            features.pNext = &queryFeatures;
+
+            vkGetPhysicalDeviceFeatures2(gpu, &features);
+            vk.supportsQueryPools =
+                queryFeatures.performanceCounterQueryPools
+                && queryFeatures.performanceCounterMultipleQueryPools;
+            if (vk.supportsQueryPools) {
+                LOG(INFO) << "gpu supports query pools";
+            } else {
+                LOG(INFO) << "gpu does not support query pools";
+            }
+        }
+#endif
+
 
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
@@ -348,26 +370,41 @@ void createDevice(Vulkan& vk) {
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
 }
 
-void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
+void createRenderPass(
+    Vulkan& vk,
+    bool clear,
+    bool prepass,
+    VkRenderPass& renderPass
+) {
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription& color = attachments.emplace_back();
     color.format = vk.swap.format;
     color.samples = VK_SAMPLE_COUNT_1_BIT;
-    color.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    color.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    color.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    color.finalLayout = prepass
+        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
     
     VkAttachmentDescription& depth = attachments.emplace_back();
     depth.format = VK_FORMAT_D32_SFLOAT;
     depth.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    depth.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     depth.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depth.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
     vector<VkAttachmentReference> colorReferences;
@@ -419,26 +456,27 @@ void initVK(Vulkan& vk) {
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
-    createRenderPass(vk, true, vk.renderPass);
-    createRenderPass(vk, false, vk.renderPassNoClear);
-    vk.depth = createVulkanDepthBuffer(
+    createRenderPass(vk, true, false, vk.renderPass);
+    createRenderPass(vk, false, false, vk.renderPassNoClear);
+    createVulkanDepthBuffer(
         vk.device,
         vk.memories,
         vk.swap.extent,
-        vk.queueFamily
+        vk.queueFamily,
+        vk.depth
     );
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);
     vk.cmdPoolTransient = createCommandPool(vk.device, vk.queueFamily, true);
 }
 
-#include "VulkanBuffer.cpp"
-#include "VulkanCommandBuffer.cpp"
-#include "VulkanDescriptors.cpp"
-#include "VulkanImage.cpp"
-#include "VulkanMemory.cpp"
-#include "VulkanMesh.cpp"
-#include "VulkanPipeline.cpp"
-#include "VulkanPresent.cpp"
-#include "VulkanSwapChain.cpp"
-#include "VulkanSynch.cpp"
+#include "Vulkan/Buffer.cpp"
+#include "Vulkan/CommandBuffer.cpp"
+#include "Vulkan/Descriptors.cpp"
+#include "Vulkan/Image.cpp"
+#include "Vulkan/Memory.cpp"
+#include "Vulkan/Mesh.cpp"
+#include "Vulkan/Pipeline.cpp"
+#include "Vulkan/Present.cpp"
+#include "Vulkan/SwapChain.cpp"
+#include "Vulkan/Synch.cpp"
