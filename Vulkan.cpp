@@ -265,7 +265,6 @@ void pickGPU(Vulkan& vk) {
         }
 #endif
 
-
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
         vector<VkQueueFamilyProperties> families(familyCount);
@@ -331,6 +330,7 @@ void createDevice(Vulkan& vk) {
     vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
 #ifdef VULKAN_MESH_SHADER
+//TODO(jan): enabling this flag breaks RenderDoc
     if (vk.supportsMeshShaders) {
         extensions.push_back(VK_NV_MESH_SHADER_EXTENSION_NAME);
     }
@@ -339,13 +339,6 @@ void createDevice(Vulkan& vk) {
     meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
     meshFeatures.meshShader = true;
     meshFeatures.taskShader = true;
-
-    VkPhysicalDeviceFeatures2 features = {};
-    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-
-    if (vk.supportsMeshShaders) {
-        features.pNext = &meshFeatures;
-    }
 #endif
 
     VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures = {};
@@ -357,7 +350,9 @@ void createDevice(Vulkan& vk) {
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     createInfo.pNext = (void*)(&indexingFeatures);
 #ifdef VULKAN_MESH_SHADER
-    createInfo.pNext = &features;
+    if (vk.supportsMeshShaders) {
+        indexingFeatures.pNext = (void*)(&meshFeatures);
+    }
 #endif
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(
         queueCreateInfos.size()
