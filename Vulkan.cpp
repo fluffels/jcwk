@@ -326,8 +326,14 @@ void createDevice(Vulkan& vk) {
     }
 #endif
 
+    VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures = {};
+    indexingFeatures.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+    indexingFeatures.descriptorBindingPartiallyBound = true;
+
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.pNext = (void*)(&indexingFeatures);
 #ifdef VULKAN_MESH_SHADER
     createInfo.pNext = &features;
 #endif

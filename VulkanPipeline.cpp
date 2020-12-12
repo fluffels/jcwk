@@ -18,6 +18,7 @@ void createDescriptorLayout(
     VulkanPipeline& pipeline
 ) {
     vector<VkDescriptorSetLayoutBinding> bindings;
+    vector<VkDescriptorBindingFlags> flags;
 
     map<uint32_t, VkDescriptorSetLayoutBinding*> bindingDescMap;
 
@@ -36,12 +37,23 @@ void createDescriptorLayout(
                     desc.descriptorCount = spirv.count;
                     desc.descriptorType = (VkDescriptorType)spirv.descriptor_type;
                     desc.stageFlags = shader.reflect.shader_stage;
+
+// TODO(jan): this flag only applies to combined image samplers, does it break
+// anything to enable it for everything?
+                    auto& flag = flags.emplace_back();
+                    flag = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
                 }
             }
         }
     }
 
+    VkDescriptorSetLayoutBindingFlagsCreateInfo flagCI = {};
+    flagCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+    flagCI.bindingCount = (uint32_t)bindings.size();
+    flagCI.pBindingFlags = flags.data();
+
     VkDescriptorSetLayoutCreateInfo descriptors = {};
+    descriptors.pNext = (void*)(&flagCI);
     descriptors.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     descriptors.bindingCount = (uint32_t)bindings.size();
     descriptors.pBindings = bindings.data();
