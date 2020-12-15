@@ -81,7 +81,7 @@ void createDebugCallback(Vulkan& vk) {
     }
 }
 
-void createVKInstance(Vulkan& vk) {
+void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
     uint32_t version;
 
     vkEnumerateInstanceVersion(&version);
@@ -107,7 +107,7 @@ void createVKInstance(Vulkan& vk) {
     }
 
     uint32_t extensionCount = 0;
-    vector<VkExtensionProperties> extensions;
+    vector<VkExtensionProperties> availableExtensions;
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
@@ -115,12 +115,12 @@ void createVKInstance(Vulkan& vk) {
             NULL
         )
     )
-    extensions.resize(extensionCount);
+    availableExtensions.resize(extensionCount);
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
             &extensionCount,
-            extensions.data()
+            availableExtensions.data()
         )
     )
 
@@ -131,9 +131,21 @@ void createVKInstance(Vulkan& vk) {
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
     );
 
+    if (appExtensions != nullptr) {
+        for (auto& appExtension: *appExtensions) {
+            for (auto& extension: vk.extensions) {
+                if (appExtension == extension) {
+                    goto OUTER;
+                }
+            }
+            vk.extensions.push_back(appExtension);
+            OUTER: ;
+        }
+    }
+
     for (auto& requestedExtension: vk.extensions) {
         bool found = false;
-        for (auto& availableExtension: extensions) {
+        for (auto& availableExtension: availableExtensions) {
             if (requestedExtension == availableExtension.extensionName) {
                 found = true;
                 break;
