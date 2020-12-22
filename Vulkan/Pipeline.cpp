@@ -12,6 +12,20 @@
 
 using std::map;
 
+struct PipelineOptions {
+    bool clockwiseWinding;
+    bool cullBackFaces;
+    VkPrimitiveTopology topology;
+};
+
+void defaultOptions(
+    PipelineOptions& options
+) {
+    options.clockwiseWinding = true;
+    options.cullBackFaces = true;
+    options.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+}
+
 void createDescriptorLayout(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
@@ -253,8 +267,7 @@ void describeInputAttributes(
 void createPipeline(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
-    VkPrimitiveTopology topology,
-    VkFrontFace frontFace,
+    PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     bool isMeshPipeline = false;
@@ -297,9 +310,9 @@ void createPipeline(
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assembly.topology = topology;
+    assembly.topology = options.topology;
     assembly.primitiveRestartEnable = VK_FALSE;
-    if (topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
+    if (options.topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
         assembly.primitiveRestartEnable = VK_TRUE;
     }
 
@@ -324,8 +337,12 @@ void createPipeline(
 
     VkPipelineRasterizationStateCreateInfo raster = {};
     raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    raster.frontFace = frontFace;
-    raster.cullMode = VK_CULL_MODE_BACK_BIT;
+    raster.frontFace = options.clockwiseWinding
+        ? VK_FRONT_FACE_CLOCKWISE
+        : VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    raster.cullMode = options.cullBackFaces
+        ? VK_CULL_MODE_BACK_BIT
+        : VK_CULL_MODE_NONE;
     raster.lineWidth = 1.f;
     raster.polygonMode = VK_POLYGON_MODE_FILL;
     raster.rasterizerDiscardEnable = VK_FALSE;
@@ -404,8 +421,7 @@ void createPipeline(
 void initVKPipeline(
     Vulkan& vk,
     char* name,
-    VkPrimitiveTopology topology,
-    VkFrontFace frontFace,
+    PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     pipeline = {};
@@ -437,8 +453,7 @@ void initVKPipeline(
     createPipeline(
         vk,
         shaders,
-        topology,
-        frontFace,
+        options,
         pipeline
     );
 }
@@ -448,13 +463,9 @@ void initVKPipeline(
     char* name,
     VulkanPipeline& pipeline
 ) {
-    initVKPipeline(
-        vk,
-        name,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        VK_FRONT_FACE_CLOCKWISE,
-        pipeline
-    );
+    PipelineOptions options = {};
+    defaultOptions(options);
+    initVKPipeline(vk, name, options, pipeline);
 }
 
 void initVKPipelineCCW(
@@ -462,11 +473,19 @@ void initVKPipelineCCW(
     char* name,
     VulkanPipeline& pipeline
 ) {
-    initVKPipeline(
-        vk,
-        name,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        VK_FRONT_FACE_COUNTER_CLOCKWISE,
-        pipeline
-    );
+    PipelineOptions options = {};
+    defaultOptions(options);
+    options.clockwiseWinding = false;
+    initVKPipeline(vk, name, options, pipeline);
+}
+
+void initVKPipelineNoCull(
+    Vulkan& vk,
+    char* name,
+    VulkanPipeline& pipeline
+) {
+    PipelineOptions options = {};
+    defaultOptions(options);
+    options.cullBackFaces = false;
+    initVKPipeline(vk, name, options, pipeline);
 }

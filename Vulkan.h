@@ -304,6 +304,11 @@ void initVKPipeline(
     char* name,
     VulkanPipeline&
 );
+void initVKPipelineNoCull(
+    Vulkan& vk,
+    char* name,
+    VulkanPipeline&
+);
 
 // Descriptors
 void updateCombinedImageSampler(
