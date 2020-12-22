@@ -108,7 +108,7 @@ struct VulkanMesh {
 
 // API Initialization
 void createFramebuffers(Vulkan&);
-void createVKInstance(Vulkan&);
+void createVKInstance(Vulkan&, vector<string>* = nullptr);
 void initVK(Vulkan&);
 void initVKSwapChain(Vulkan&);
 
