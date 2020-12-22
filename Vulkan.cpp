@@ -56,6 +56,35 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
+void computeSampleCounts(Vulkan& vk) {
+    VkPhysicalDeviceProperties props = {};
+    vkGetPhysicalDeviceProperties(vk.gpu, &props);
+    auto counts = props.limits.framebufferColorSampleCounts &
+        props.limits.framebufferDepthSampleCounts;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_64_BIT;
+        vk.sampleCount = 64;
+    } else if (counts & VK_SAMPLE_COUNT_32_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_32_BIT;
+        vk.sampleCount = 32;
+    } else if (counts & VK_SAMPLE_COUNT_16_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_16_BIT;
+        vk.sampleCount = 16;
+    } else if (counts & VK_SAMPLE_COUNT_8_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_8_BIT;
+        vk.sampleCount = 8;
+    } else if (counts & VK_SAMPLE_COUNT_4_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_4_BIT;
+        vk.sampleCount = 4;
+    } else if (counts & VK_SAMPLE_COUNT_2_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_2_BIT;
+        vk.sampleCount = 2;
+    } else {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_1_BIT;
+        vk.sampleCountFlags = 1;
+    }
+}
+
 void createDebugCallback(Vulkan& vk) {
     VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo = {};
     debugReportCallbackCreateInfo.sType =
@@ -385,7 +414,7 @@ void createRenderPass(
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription& color = attachments.emplace_back();
     color.format = vk.swap.format;
-    color.samples = VK_SAMPLE_COUNT_1_BIT;
+    color.samples = (VkSampleCountFlagBits)vk.sampleCountFlags;
     color.loadOp = clear
         ? VK_ATTACHMENT_LOAD_OP_CLEAR
         : VK_ATTACHMENT_LOAD_OP_LOAD;
@@ -394,14 +423,14 @@ void createRenderPass(
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     color.initialLayout = clear
         ? VK_IMAGE_LAYOUT_UNDEFINED
-        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     color.finalLayout = prepass
         ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        : VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     
     VkAttachmentDescription& depth = attachments.emplace_back();
     depth.format = VK_FORMAT_D32_SFLOAT;
-    depth.samples = VK_SAMPLE_COUNT_1_BIT;
+    depth.samples = (VkSampleCountFlagBits)vk.sampleCountFlags;
     depth.loadOp = clear
         ? VK_ATTACHMENT_LOAD_OP_CLEAR
         : VK_ATTACHMENT_LOAD_OP_LOAD;
@@ -413,6 +442,17 @@ void createRenderPass(
         : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription& resolve = attachments.emplace_back();
+    resolve.format = vk.swap.format;
+    resolve.samples = VK_SAMPLE_COUNT_1_BIT;
+    resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+// TODO(jan): can this vector be removed
     vector<VkAttachmentReference> colorReferences;
     VkAttachmentReference colorReference = {};
     colorReference.attachment = 0;
@@ -423,12 +463,17 @@ void createRenderPass(
     depthReference.attachment = 1;
     depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentReference resolveReference = {};
+    resolveReference.attachment = 2;
+    resolveReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
     vector<VkSubpassDescription> subpasses;
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = (uint32_t)colorReferences.size();
     subpass.pColorAttachments = colorReferences.data();
     subpass.pDepthStencilAttachment = &depthReference;
+    subpass.pResolveAttachments = &resolveReference;
     subpasses.push_back(subpass);
 
     VkSubpassDependency dependency = {};
@@ -455,6 +500,7 @@ void createRenderPass(
 
 void initVK(Vulkan& vk) {
     pickGPU(vk);
+    computeSampleCounts(vk);
     createDevice(vk);
 #ifdef VULKAN_MESH_SHADER
     getFunctions(vk);
@@ -464,11 +510,21 @@ void initVK(Vulkan& vk) {
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
     createRenderPass(vk, true, false, vk.renderPass);
     createRenderPass(vk, false, false, vk.renderPassNoClear);
+    createVulkanColorBuffer(
+        vk.device,
+        vk.memories,
+        vk.swap.extent,
+        vk.queueFamily,
+        vk.swap.format,
+        (VkSampleCountFlagBits)vk.sampleCountFlags,
+        vk.color
+    );
     createVulkanDepthBuffer(
         vk.device,
         vk.memories,
         vk.swap.extent,
         vk.queueFamily,
+        (VkSampleCountFlagBits)vk.sampleCountFlags,
         vk.depth
     );
     createFramebuffers(vk);

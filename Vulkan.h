@@ -66,6 +66,7 @@ struct Vulkan {
     VkRenderPass renderPassNoClear;
     VulkanSwapChain swap;
 
+    VulkanImage color;
     VulkanImage depth;
     VulkanBuffer uniforms;
 
@@ -76,6 +77,9 @@ struct Vulkan {
     bool supportsQueryPools;
 
     PFN_vkCmdDrawMeshTasksNV cmdDrawMeshTasksNV;
+
+    VkSampleCountFlags sampleCountFlags;
+    uint8_t sampleCount;
 };
 
 struct VulkanShader {
@@ -251,11 +255,21 @@ void createPrepassImage(
     VkFormat format,
     VulkanSampler& sampler
 );
+void createVulkanColorBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VkSampleCountFlagBits samples,
+    VulkanImage& image
+);
 void createVulkanDepthBuffer(
     VkDevice,
     VkPhysicalDeviceMemoryProperties&,
     VkExtent2D,
     uint32_t,
+    VkSampleCountFlagBits samples,
     VulkanImage&
 );
 void createVulkanSampler2D(

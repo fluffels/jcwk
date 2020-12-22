@@ -351,9 +351,8 @@ void createPipeline(
 
     VkPipelineMultisampleStateCreateInfo msample = {};
     msample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    msample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
     msample.sampleShadingEnable = VK_FALSE;
-    msample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    msample.rasterizationSamples = (VkSampleCountFlagBits)vk.sampleCountFlags;
     msample.minSampleShading = 1.0f;
     msample.pSampleMask = nullptr;
     msample.alphaToCoverageEnable = VK_FALSE;

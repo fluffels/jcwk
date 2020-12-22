@@ -123,10 +123,10 @@ void createViews(Vulkan& vk) {
 
 void createFramebuffers(Vulkan& vk) {
     for (auto& image: vk.swap.images) {
-        VkImageView imageViews[] = { image.view, vk.depth.view };
+        VkImageView imageViews[] = { vk.color.view, vk.depth.view, image.view };
         VkFramebufferCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        createInfo.attachmentCount = 2;
+        createInfo.attachmentCount = 3;
         createInfo.pAttachments = imageViews;
         createInfo.renderPass = vk.renderPass;
         createInfo.height = vk.swap.extent.height;

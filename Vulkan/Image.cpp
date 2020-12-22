@@ -36,6 +36,7 @@ void createImage(
     VkFormat format,
     VkImageUsageFlags usage,
     VkImageCreateFlags flags,
+    VkSampleCountFlagBits samples,
     VkImage& image
 ) {
     VkImageCreateInfo createInfo = {};
@@ -52,7 +53,7 @@ void createImage(
     createInfo.pQueueFamilyIndices = &family;
     createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.usage = usage;
-    createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    createInfo.samples = samples;
 
     auto code = vkCreateImage(device, &createInfo, nullptr, &image);
     checkSuccess(code);
@@ -119,6 +120,7 @@ void createVulkanImage(
     VkImageAspectFlags aspectMask,
     bool hostVisible,
     VkImageCreateFlags imageCreateFlags,
+    VkSampleCountFlagBits samples,
     VulkanImage& image
 ) {
     createImage(
@@ -130,6 +132,7 @@ void createVulkanImage(
         format,
         usage,
         imageCreateFlags,
+        samples,
         image.handle
     );
 
@@ -160,11 +163,42 @@ void destroyVulkanSampler(VkDevice device, VulkanSampler sampler) {
     destroyVulkanImage(device, sampler.image);
 }
 
+void createVulkanColorBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VkSampleCountFlagBits samples,
+    VulkanImage& image
+) {
+    createVulkanImage(
+        device,
+        memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_2D,
+        extent,
+        1,
+        family,
+        format,
+        VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+            | VK_IMAGE_USAGE_TRANSFER_DST_BIT
+            | VK_IMAGE_USAGE_SAMPLED_BIT
+            | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        false,
+        0,
+        samples,
+        image
+    );
+}
+
 void createVulkanDepthBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
     uint32_t family,
+    VkSampleCountFlagBits samples,
     VulkanImage& image
 ) {
     createVulkanImage(
@@ -180,6 +214,7 @@ void createVulkanDepthBuffer(
         VK_IMAGE_ASPECT_DEPTH_BIT,
         false,
         0,
+        samples,
         image
     );
 }
@@ -193,6 +228,7 @@ void createVulkanSampler(
     uint32_t layerCount,
     uint32_t family,
     VkImageCreateFlags imageCreateFlags,
+    VkSampleCountFlagBits samples,
     VulkanSampler& sampler
 ) {
     createVulkanImage(
@@ -208,6 +244,7 @@ void createVulkanSampler(
         VK_IMAGE_ASPECT_COLOR_BIT,
         false,
         imageCreateFlags,
+        samples,
         sampler.image
     );
     createSampler(
@@ -232,6 +269,7 @@ void createVulkanSampler2D(
         1,
         family,
         0,
+        VK_SAMPLE_COUNT_1_BIT,
         sampler
     );
 }
@@ -252,6 +290,7 @@ void createVulkanSamplerCube(
         6,
         family,
         VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT,
+        VK_SAMPLE_COUNT_1_BIT,
         sampler
     );
 }
@@ -277,6 +316,7 @@ void createPrepassImage(
         VK_IMAGE_ASPECT_COLOR_BIT,
         false,
         0,
+        VK_SAMPLE_COUNT_1_BIT,
         sampler.image
     );
     createSampler(
