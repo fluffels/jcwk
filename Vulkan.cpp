@@ -57,10 +57,17 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 }
 
 void computeSampleCounts(Vulkan& vk) {
+    // TODO(jan): make this configurable
+    auto maxSampleCount = VK_SAMPLE_COUNT_2_BIT;
+    auto sampleCountFilter = 0;
+    for (int i = 0; i < maxSampleCount; i++) {
+        sampleCountFilter |= (1 << i);
+    }
     VkPhysicalDeviceProperties props = {};
     vkGetPhysicalDeviceProperties(vk.gpu, &props);
     auto counts = props.limits.framebufferColorSampleCounts &
-        props.limits.framebufferDepthSampleCounts;
+        props.limits.framebufferDepthSampleCounts &
+        sampleCountFilter;
     if (counts & VK_SAMPLE_COUNT_64_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_64_BIT;
         vk.sampleCount = 64;
