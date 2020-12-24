@@ -1,10 +1,18 @@
 #include "FileSystem.h"
 
-#include <io.h>
+#ifdef WIN32
+    #include <io.h>
+#else
+    #include <unistd.h>
+#endif
 
 bool
 fexists(char* path) {
+#ifdef WIN32
     auto accessResult = _access_s(path, 4);
+#else
+    auto accessResult = access(path, 4);
+#endif
     return accessResult != ENOENT;
 }
 

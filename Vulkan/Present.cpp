@@ -39,7 +39,7 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdss) {
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &vk.swap.cmdBufferDone;
-    vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
+    vkQueueSubmit(vk.queue, 1, &submitInfo, VK_NULL_HANDLE);
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

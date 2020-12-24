@@ -4,7 +4,6 @@
 #include "SPIRV-Reflect/spirv_reflect.h"
 
 #include <assert.h>
-#include <io.h>
 #include <map>
 
 #include "FileSystem.h"
@@ -181,11 +180,10 @@ void createShaderModule(
 }
 
 void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
-    auto accessResult = _access_s(path.c_str(), 4);
-    if (accessResult == EACCES) {
+    if (fexists(path.c_str())) {
         LOG(ERROR) << "file '" << path << "': access denied";
         exit(-1);
-    } else if (accessResult == ENOENT) {
+    } else {
         LOG(ERROR) << "file '" << path << "': file not found";
         exit(-1);
     }

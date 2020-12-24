@@ -441,5 +441,5 @@ void uploadTexture(
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
-    vkQueueSubmit(queue, 1, &submitInfo, nullptr);
+    vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
