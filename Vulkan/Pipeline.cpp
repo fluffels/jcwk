@@ -9,6 +9,14 @@
 #include "FileSystem.h"
 #include "Vulkan.h"
 
+#ifdef WIN32
+    #define sprintf sprintf_s
+#endif
+
+#ifndef max
+    #define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
+
 using std::map;
 
 void createDescriptorLayout(
@@ -389,7 +397,7 @@ void createPipeline(
 
 void initVKPipeline(
     Vulkan& vk,
-    char* name,
+    const char* name,
     VkPrimitiveTopology topology,
     VkFrontFace frontFace,
     VulkanPipeline& pipeline
@@ -399,11 +407,11 @@ void initVKPipeline(
     vector<VulkanShader> shaders(2);
 
     char vertFile[255];
-    sprintf_s(vertFile, "shaders/%s.vert.spv", name);
+    sprintf(vertFile, "shaders/%s.vert.spv", name);
     char meshFile[255];
-    sprintf_s(meshFile, "shaders/%s.mesh.spv", name);
+    sprintf(meshFile, "shaders/%s.mesh.spv", name);
     char fragFile[255];
-    sprintf_s(fragFile, "shaders/%s.frag.spv", name);
+    sprintf(fragFile, "shaders/%s.frag.spv", name);
 
     if (fexists(vertFile)) {
         createShaderModule(vk, vertFile, shaders[0]);
@@ -431,7 +439,7 @@ void initVKPipeline(
 
 void initVKPipeline(
     Vulkan& vk,
-    char* name,
+    const char* name,
     VulkanPipeline& pipeline
 ) {
     initVKPipeline(
@@ -445,7 +453,7 @@ void initVKPipeline(
 
 void initVKPipelineCCW(
     Vulkan& vk,
-    char* name,
+    const char* name,
     VulkanPipeline& pipeline
 ) {
     initVKPipeline(

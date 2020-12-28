@@ -327,7 +327,7 @@ void createDevice(Vulkan& vk) {
     queue.pQueuePriorities = &prio;
     queueCreateInfos.push_back(queue);
 
-    vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
+    vector<const char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
 #ifdef VULKAN_MESH_SHADER
     if (vk.supportsMeshShaders) {

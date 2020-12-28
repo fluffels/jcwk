@@ -7,7 +7,7 @@
 #endif
 
 bool
-fexists(char* path) {
+fexists(const char* path) {
 #ifdef WIN32
     auto accessResult = _access_s(path, 4);
 #else

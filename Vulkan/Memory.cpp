@@ -13,21 +13,11 @@ VkPhysicalDeviceMemoryProperties getMemories(VkPhysicalDevice gpu) {
     return memories;
 }
 
-VkMemoryRequirements getMemoryRequirements(VkDevice device, VkBuffer buffer) {
+VkMemoryRequirements getMemoryRequirements(VkDevice device, uint64_t buffer) {
     VkMemoryRequirements requirements = {};
     vkGetBufferMemoryRequirements(
         device,
         buffer,
-        &requirements
-    );
-    return requirements;
-}  
-
-VkMemoryRequirements getMemoryRequirements(VkDevice device, VkImage image) {
-    VkMemoryRequirements requirements = {};
-    vkGetImageMemoryRequirements(
-        device,
-        image,
         &requirements
     );
     return requirements;
@@ -79,19 +69,10 @@ void* mapMemory(
 
 void* mapMemory(
     VkDevice device,
-    VkBuffer buffer,
+    uint64_t buffer,
     VkDeviceMemory memory
 ) {
     auto requirements = getMemoryRequirements(device, buffer);
-    return mapMemory(device, requirements, memory);
-}
-
-void* mapMemory(
-    VkDevice device,
-    VkImage image,
-    VkDeviceMemory memory
-) {
-    auto requirements = getMemoryRequirements(device, image);
     return mapMemory(device, requirements, memory);
 }
 

@@ -119,11 +119,11 @@ uint32_t selectMemoryTypeIndex(
     VkMemoryRequirements,
     VkMemoryPropertyFlags
 );
-VkMemoryRequirements getMemoryRequirements(VkDevice, VkBuffer);
-VkMemoryRequirements getMemoryRequirements(VkDevice, VkImage);
+// NOTE(jan): this works for both VkImage & VkBuffer
+VkMemoryRequirements getMemoryRequirements(VkDevice, uint64_t);
 void* mapMemory(VkDevice, VkMemoryRequirements, VkDeviceMemory);
-void* mapMemory(VkDevice, VkImage, VkDeviceMemory);
-void* mapMemory(VkDevice, VkBuffer, VkDeviceMemory);
+// NOTE(jan): this works for both VkImage & VkBuffer
+void* mapMemory(VkDevice, uint64_t, VkDeviceMemory);
 void unMapMemory(VkDevice, VkDeviceMemory);
 
 // Synchronization
@@ -277,12 +277,12 @@ void destroyVulkanSampler(
 // Pipeline
 void initVKPipelineCCW(
     Vulkan& vk,
-    char* name,
+    const char* name,
     VulkanPipeline&
 );
 void initVKPipeline(
     Vulkan& vk,
-    char* name,
+    const char* name,
     VulkanPipeline&
 );
 
