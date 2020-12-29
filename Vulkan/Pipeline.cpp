@@ -19,12 +19,29 @@
 
 using std::map;
 
+struct PipelineOptions {
+    bool clockwiseWinding;
+    bool cullBackFaces;
+    VkPrimitiveTopology topology;
+};
+
+void defaultOptions(
+    PipelineOptions& options
+) {
+    options.clockwiseWinding = true;
+    options.cullBackFaces = true;
+    options.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+}
+
 void createDescriptorLayout(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
     VulkanPipeline& pipeline
 ) {
     vector<VkDescriptorSetLayoutBinding> bindings;
+#ifdef VK_API_VERSION_1_2
+    vector<VkDescriptorBindingFlags> flags;
+#endif
 
     map<uint32_t, VkDescriptorSetLayoutBinding*> bindingDescMap;
 
@@ -43,12 +60,31 @@ void createDescriptorLayout(
                     desc.descriptorCount = spirv.count;
                     desc.descriptorType = (VkDescriptorType)spirv.descriptor_type;
                     desc.stageFlags = shader.reflect.shader_stage;
+
+// TODO(jan): this flag only applies to combined image samplers, does it break
+// anything to enable it for everything?
+#ifdef VK_API_VERSION_1_2
+                    auto& flag = flags.emplace_back();
+                    flag = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
+#endif
                 }
             }
         }
     }
 
+#ifdef VK_API_VERSION_1_2
+    VkDescriptorSetLayoutBindingFlagsCreateInfo flagCI = {};
+    flagCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO;
+    flagCI.bindingCount = (uint32_t)bindings.size();
+    flagCI.pBindingFlags = flags.data();
+#endif
+
     VkDescriptorSetLayoutCreateInfo descriptors = {};
+#ifdef VK_API_VERSION_1_2
+    descriptors.pNext = (void*)(&flagCI);
+#else
+    descriptors.pNext = nullptr;
+#endif
     descriptors.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     descriptors.bindingCount = (uint32_t)bindings.size();
     descriptors.pBindings = bindings.data();
@@ -247,8 +283,7 @@ void describeInputAttributes(
 void createPipeline(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
-    VkPrimitiveTopology topology,
-    VkFrontFace frontFace,
+    PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     bool isMeshPipeline = false;
@@ -291,9 +326,9 @@ void createPipeline(
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assembly.topology = topology;
+    assembly.topology = options.topology;
     assembly.primitiveRestartEnable = VK_FALSE;
-    if (topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
+    if (options.topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
         assembly.primitiveRestartEnable = VK_TRUE;
     }
 
@@ -318,8 +353,12 @@ void createPipeline(
 
     VkPipelineRasterizationStateCreateInfo raster = {};
     raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    raster.frontFace = frontFace;
-    raster.cullMode = VK_CULL_MODE_BACK_BIT;
+    raster.frontFace = options.clockwiseWinding
+        ? VK_FRONT_FACE_CLOCKWISE
+        : VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    raster.cullMode = options.cullBackFaces
+        ? VK_CULL_MODE_BACK_BIT
+        : VK_CULL_MODE_NONE;
     raster.lineWidth = 1.f;
     raster.polygonMode = VK_POLYGON_MODE_FILL;
     raster.rasterizerDiscardEnable = VK_FALSE;
@@ -328,9 +367,8 @@ void createPipeline(
 
     VkPipelineMultisampleStateCreateInfo msample = {};
     msample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    msample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
     msample.sampleShadingEnable = VK_FALSE;
-    msample.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
+    msample.rasterizationSamples = (VkSampleCountFlagBits)vk.sampleCountFlags;
     msample.minSampleShading = 1.0f;
     msample.pSampleMask = nullptr;
     msample.alphaToCoverageEnable = VK_FALSE;
@@ -398,8 +436,7 @@ void createPipeline(
 void initVKPipeline(
     Vulkan& vk,
     const char* name,
-    VkPrimitiveTopology topology,
-    VkFrontFace frontFace,
+    PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     pipeline = {};
@@ -431,8 +468,7 @@ void initVKPipeline(
     createPipeline(
         vk,
         shaders,
-        topology,
-        frontFace,
+        options,
         pipeline
     );
 }
@@ -442,13 +478,9 @@ void initVKPipeline(
     const char* name,
     VulkanPipeline& pipeline
 ) {
-    initVKPipeline(
-        vk,
-        name,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        VK_FRONT_FACE_CLOCKWISE,
-        pipeline
-    );
+    PipelineOptions options = {};
+    defaultOptions(options);
+    initVKPipeline(vk, name, options, pipeline);
 }
 
 void initVKPipelineCCW(
@@ -456,11 +488,19 @@ void initVKPipelineCCW(
     const char* name,
     VulkanPipeline& pipeline
 ) {
-    initVKPipeline(
-        vk,
-        name,
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-        VK_FRONT_FACE_COUNTER_CLOCKWISE,
-        pipeline
-    );
+    PipelineOptions options = {};
+    defaultOptions(options);
+    options.clockwiseWinding = false;
+    initVKPipeline(vk, name, options, pipeline);
+}
+
+void initVKPipelineNoCull(
+    Vulkan& vk,
+    char* name,
+    VulkanPipeline& pipeline
+) {
+    PipelineOptions options = {};
+    defaultOptions(options);
+    options.cullBackFaces = false;
+    initVKPipeline(vk, name, options, pipeline);
 }

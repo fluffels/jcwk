@@ -56,14 +56,49 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     return VK_FALSE;
 }
 
+void computeSampleCounts(Vulkan& vk) {
+    // TODO(jan): make this configurable
+    auto maxSampleCount = VK_SAMPLE_COUNT_2_BIT;
+    auto sampleCountFilter = 0;
+    for (int i = 0; i < maxSampleCount; i++) {
+        sampleCountFilter |= (1 << i);
+    }
+    VkPhysicalDeviceProperties props = {};
+    vkGetPhysicalDeviceProperties(vk.gpu, &props);
+    auto counts = props.limits.framebufferColorSampleCounts &
+        props.limits.framebufferDepthSampleCounts &
+        sampleCountFilter;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_64_BIT;
+        vk.sampleCount = 64;
+    } else if (counts & VK_SAMPLE_COUNT_32_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_32_BIT;
+        vk.sampleCount = 32;
+    } else if (counts & VK_SAMPLE_COUNT_16_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_16_BIT;
+        vk.sampleCount = 16;
+    } else if (counts & VK_SAMPLE_COUNT_8_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_8_BIT;
+        vk.sampleCount = 8;
+    } else if (counts & VK_SAMPLE_COUNT_4_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_4_BIT;
+        vk.sampleCount = 4;
+    } else if (counts & VK_SAMPLE_COUNT_2_BIT) {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_2_BIT;
+        vk.sampleCount = 2;
+    } else {
+        vk.sampleCountFlags = VK_SAMPLE_COUNT_1_BIT;
+        vk.sampleCountFlags = 1;
+    }
+}
+
 void createDebugCallback(Vulkan& vk) {
     VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo = {};
     debugReportCallbackCreateInfo.sType =
         VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
     debugReportCallbackCreateInfo.flags =
         VK_DEBUG_REPORT_ERROR_BIT_EXT |
-        VK_DEBUG_REPORT_WARNING_BIT_EXT |
-        VK_DEBUG_REPORT_DEBUG_BIT_EXT;
+        VK_DEBUG_REPORT_WARNING_BIT_EXT;
     debugReportCallbackCreateInfo.pfnCallback = debugCallback;
     auto create =
         (PFN_vkCreateDebugReportCallbackEXT)
@@ -82,7 +117,7 @@ void createDebugCallback(Vulkan& vk) {
     }
 }
 
-void createVKInstance(Vulkan& vk) {
+void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
     uint32_t version;
 
     vkEnumerateInstanceVersion(&version);
@@ -108,7 +143,7 @@ void createVKInstance(Vulkan& vk) {
     }
 
     uint32_t extensionCount = 0;
-    vector<VkExtensionProperties> extensions;
+    vector<VkExtensionProperties> availableExtensions;
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
@@ -116,12 +151,12 @@ void createVKInstance(Vulkan& vk) {
             NULL
         )
     )
-    extensions.resize(extensionCount);
+    availableExtensions.resize(extensionCount);
     checkSuccess(
         vkEnumerateInstanceExtensionProperties(
             NULL,
             &extensionCount,
-            extensions.data()
+            availableExtensions.data()
         )
     )
 
@@ -132,9 +167,21 @@ void createVKInstance(Vulkan& vk) {
         VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME
     );
 
+    if (appExtensions != nullptr) {
+        for (auto& appExtension: *appExtensions) {
+            for (auto& extension: vk.extensions) {
+                if (appExtension == extension) {
+                    goto OUTER;
+                }
+            }
+            vk.extensions.push_back(appExtension);
+            OUTER: ;
+        }
+    }
+
     for (auto& requestedExtension: vk.extensions) {
         bool found = false;
-        for (auto& availableExtension: extensions) {
+        for (auto& availableExtension: availableExtensions) {
             if (requestedExtension == availableExtension.extensionName) {
                 found = true;
                 break;
@@ -264,7 +311,6 @@ void pickGPU(Vulkan& vk) {
         }
 #endif
 
-
         uint32_t familyCount = 0;
         vkGetPhysicalDeviceQueueFamilyProperties(gpu, &familyCount, nullptr);
         vector<VkQueueFamilyProperties> families(familyCount);
@@ -330,6 +376,7 @@ void createDevice(Vulkan& vk) {
     vector<const char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
 #ifdef VULKAN_MESH_SHADER
+//TODO(jan): enabling this flag breaks RenderDoc
     if (vk.supportsMeshShaders) {
         extensions.push_back(VK_NV_MESH_SHADER_EXTENSION_NAME);
     }
@@ -338,19 +385,26 @@ void createDevice(Vulkan& vk) {
     meshFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_NV;
     meshFeatures.meshShader = true;
     meshFeatures.taskShader = true;
+#endif
 
-    VkPhysicalDeviceFeatures2 features = {};
-    features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2_KHR;
-
-    if (vk.supportsMeshShaders) {
-        features.pNext = &meshFeatures;
-    }
+#ifdef VK_API_VERSION_1_2
+    VkPhysicalDeviceDescriptorIndexingFeatures indexingFeatures = {};
+    indexingFeatures.sType =
+        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES;
+    indexingFeatures.descriptorBindingPartiallyBound = true;
 #endif
 
     VkDeviceCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-#ifdef VULKAN_MESH_SHADER
-    createInfo.pNext = &features;
+#ifdef VK_API_VERSION_1_2
+    createInfo.pNext = (void*)(&indexingFeatures);
+    #ifdef VULKAN_MESH_SHADER
+        if (vk.supportsMeshShaders) {
+            indexingFeatures.pNext = (void*)(&meshFeatures);
+        }
+    #endif
+#else
+    createInfo.pNext = nullptr;
 #endif
     createInfo.queueCreateInfoCount = static_cast<uint32_t>(
         queueCreateInfos.size()
@@ -363,28 +417,54 @@ void createDevice(Vulkan& vk) {
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
 }
 
-void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
+void createRenderPass(
+    Vulkan& vk,
+    bool clear,
+    bool prepass,
+    VkRenderPass& renderPass
+) {
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription& color = attachments.emplace_back();
     color.format = vk.swap.format;
-    color.samples = VK_SAMPLE_COUNT_1_BIT;
-    color.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    color.samples = (VkSampleCountFlagBits)vk.sampleCountFlags;
+    color.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    color.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    color.finalLayout = prepass
+        ? VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
     
     VkAttachmentDescription& depth = attachments.emplace_back();
     depth.format = VK_FORMAT_D32_SFLOAT;
-    depth.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_LOAD;
+    depth.samples = (VkSampleCountFlagBits)vk.sampleCountFlags;
+    depth.loadOp = clear
+        ? VK_ATTACHMENT_LOAD_OP_CLEAR
+        : VK_ATTACHMENT_LOAD_OP_LOAD;
     depth.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.initialLayout = clear ? VK_IMAGE_LAYOUT_UNDEFINED: VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    depth.initialLayout = clear
+        ? VK_IMAGE_LAYOUT_UNDEFINED
+        : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
     depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription& resolve = attachments.emplace_back();
+    resolve.format = vk.swap.format;
+    resolve.samples = VK_SAMPLE_COUNT_1_BIT;
+    resolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    resolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+    resolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    resolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    resolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    resolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+
+// TODO(jan): can this vector be removed
     vector<VkAttachmentReference> colorReferences;
     VkAttachmentReference colorReference = {};
     colorReference.attachment = 0;
@@ -395,12 +475,17 @@ void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
     depthReference.attachment = 1;
     depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentReference resolveReference = {};
+    resolveReference.attachment = 2;
+    resolveReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
     vector<VkSubpassDescription> subpasses;
     VkSubpassDescription subpass = {};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = (uint32_t)colorReferences.size();
     subpass.pColorAttachments = colorReferences.data();
     subpass.pDepthStencilAttachment = &depthReference;
+    subpass.pResolveAttachments = &resolveReference;
     subpasses.push_back(subpass);
 
     VkSubpassDependency dependency = {};
@@ -427,6 +512,7 @@ void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
 
 void initVK(Vulkan& vk) {
     pickGPU(vk);
+    computeSampleCounts(vk);
     createDevice(vk);
 #ifdef VULKAN_MESH_SHADER
     getFunctions(vk);
@@ -434,13 +520,24 @@ void initVK(Vulkan& vk) {
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.uniforms);
-    createRenderPass(vk, true, vk.renderPass);
-    createRenderPass(vk, false, vk.renderPassNoClear);
-    vk.depth = createVulkanDepthBuffer(
+    createRenderPass(vk, true, false, vk.renderPass);
+    createRenderPass(vk, false, false, vk.renderPassNoClear);
+    createVulkanColorBuffer(
         vk.device,
         vk.memories,
         vk.swap.extent,
-        vk.queueFamily
+        vk.queueFamily,
+        vk.swap.format,
+        (VkSampleCountFlagBits)vk.sampleCountFlags,
+        vk.color
+    );
+    createVulkanDepthBuffer(
+        vk.device,
+        vk.memories,
+        vk.swap.extent,
+        vk.queueFamily,
+        (VkSampleCountFlagBits)vk.sampleCountFlags,
+        vk.depth
     );
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);

@@ -104,35 +104,29 @@ void getImages(Vulkan& vk) {
     }
 }
 
+void createSwapImageView(Vulkan& vk, VkImage image, VkImageView& view) {
+    createView(
+        vk.device,
+        image,
+        VK_IMAGE_VIEW_TYPE_2D,
+        vk.swap.format,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        view
+    );
+}
+
 void createViews(Vulkan& vk) {
     for (auto& image: vk.swap.images) {
-        VkImageViewCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        createInfo.image = image.handle;
-        createInfo.format = vk.swap.format;
-        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        createInfo.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-        createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-        checkSuccess(vkCreateImageView(
-            vk.device,
-            &createInfo,
-            nullptr,
-            &image.view
-        ));
+        createSwapImageView(vk, image.handle, image.view);
     }
 }
 
 void createFramebuffers(Vulkan& vk) {
     for (auto& image: vk.swap.images) {
-        VkImageView imageViews[] = { image.view, vk.depth.view };
+        VkImageView imageViews[] = { vk.color.view, vk.depth.view, image.view };
         VkFramebufferCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-        createInfo.attachmentCount = 2;
+        createInfo.attachmentCount = 3;
         createInfo.pAttachments = imageViews;
         createInfo.renderPass = vk.renderPass;
         createInfo.height = vk.swap.extent.height;

@@ -66,6 +66,7 @@ struct Vulkan {
     VkRenderPass renderPassNoClear;
     VulkanSwapChain swap;
 
+    VulkanImage color;
     VulkanImage depth;
     VulkanBuffer uniforms;
 
@@ -76,6 +77,9 @@ struct Vulkan {
     bool supportsQueryPools;
 
     PFN_vkCmdDrawMeshTasksNV cmdDrawMeshTasksNV;
+
+    VkSampleCountFlags sampleCountFlags;
+    uint8_t sampleCount;
 };
 
 struct VulkanShader {
@@ -108,7 +112,7 @@ struct VulkanMesh {
 
 // API Initialization
 void createFramebuffers(Vulkan&);
-void createVKInstance(Vulkan&);
+void createVKInstance(Vulkan&, vector<string>* = nullptr);
 void initVK(Vulkan&);
 void initVKSwapChain(Vulkan&);
 
@@ -128,6 +132,14 @@ void unMapMemory(VkDevice, VkDeviceMemory);
 
 // Synchronization
 VkSemaphore createSemaphore(VkDevice device);
+
+// Render Pass
+void createRenderPass(
+    Vulkan& vk,
+    bool clear,
+    bool prepass,
+    VkRenderPass& renderPass
+);
 
 // Buffers
 void createUniformBuffer(
@@ -235,23 +247,44 @@ void createCommandBuffers(
 );
 
 // Images & Samplers
-VulkanImage createVulkanDepthBuffer(
+void createPrepassImage(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VulkanSampler& sampler
+);
+void createVulkanColorBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family,
+    VkFormat format,
+    VkSampleCountFlagBits samples,
+    VulkanImage& image
+);
+void createVulkanDepthBuffer(
     VkDevice,
     VkPhysicalDeviceMemoryProperties&,
     VkExtent2D,
-    uint32_t
+    uint32_t,
+    VkSampleCountFlagBits samples,
+    VulkanImage&
 );
-VulkanSampler createVulkanSampler2D(
+void createVulkanSampler2D(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler&
 );
-VulkanSampler createVulkanSamplerCube(
+void createVulkanSamplerCube(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t family,
+    VulkanSampler&
 );
 void uploadTexture(
     VkDevice device,
@@ -283,6 +316,11 @@ void initVKPipelineCCW(
 void initVKPipeline(
     Vulkan& vk,
     const char* name,
+    VulkanPipeline&
+);
+void initVKPipelineNoCull(
+    Vulkan& vk,
+    char* name,
     VulkanPipeline&
 );
 
