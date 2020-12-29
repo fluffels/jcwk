@@ -84,7 +84,7 @@ void createDescriptorLayout(
     descriptors.pNext = (void*)(&flagCI);
 #else
     descriptors.pNext = nullptr;
-#endif
+    #endif
     descriptors.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     descriptors.bindingCount = (uint32_t)bindings.size();
     descriptors.pBindings = bindings.data();
