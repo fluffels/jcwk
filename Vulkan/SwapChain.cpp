@@ -1,7 +1,7 @@
 #include "Vulkan.h"
 
 void findSwapFormats(Vulkan& vk) {
-    checkSuccess(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+    VKCHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         vk.gpu,
         vk.swap.surface,
         &vk.swap.surfaceCapabilities
@@ -83,7 +83,7 @@ void createSwapChain(Vulkan& vk) {
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
     createInfo.clipped = VK_FALSE;
 
-    checkSuccess(vkCreateSwapchainKHR(
+    VKCHECK(vkCreateSwapchainKHR(
         vk.device, &createInfo, nullptr, &vk.swap.handle
     ));
 }
@@ -93,7 +93,7 @@ void getImages(Vulkan& vk) {
     vkGetSwapchainImagesKHR(vk.device, vk.swap.handle, &count, nullptr);
     vector<VkImage> handles(count);
     vk.swap.images.resize(count);
-    checkSuccess(vkGetSwapchainImagesKHR(
+    VKCHECK(vkGetSwapchainImagesKHR(
         vk.device,
         vk.swap.handle,
         &count,
@@ -133,7 +133,7 @@ void createFramebuffers(Vulkan& vk) {
         createInfo.width = vk.swap.extent.width;
         createInfo.layers = 1;
         auto& fb = vk.swap.framebuffers.emplace_back();
-        checkSuccess(vkCreateFramebuffer(vk.device, &createInfo, nullptr, &fb));
+        VKCHECK(vkCreateFramebuffer(vk.device, &createInfo, nullptr, &fb));
     }
 }
 

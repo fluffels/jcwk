@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include "easylogging++.h"
-
 #include "Vulkan.h"
 
 using std::runtime_error;
@@ -25,9 +23,7 @@ void checkVersion(uint32_t version) {
     auto minor = VK_VERSION_MINOR(version);
     auto patch = VK_VERSION_PATCH(version);
 
-    LOG(INFO) << "Instance version: " << major << "."
-                                      << minor << "."
-                                      << patch;
+    INFO("Instance version: %d.%d.%d", major, minor, patch);
     
     if ((major < 1) || (minor < 2) || (patch < 141)) {
         throw runtime_error("you need at least Vulkan 1.2.141");
@@ -45,13 +41,13 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     void *userData
 ) {
     if (flags == VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-        LOG(ERROR) << "[" << layerPrefix << "] " << msg;
+        LOG("ERROR", "[%s] %s", layerPrefix, msg);
     } else if (flags == VK_DEBUG_REPORT_WARNING_BIT_EXT) {
-        LOG(WARNING) << "[" << layerPrefix << "] " << msg;
+        LOG("WARNING", "[%s] %s", layerPrefix, msg);
     } else if (flags == VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-        LOG(DEBUG) << "[" << layerPrefix << "] " << msg;
+        LOG("DEBUG", "[%s] %s", layerPrefix, msg);
     } else {
-        LOG(INFO) << "[" << layerPrefix << "] " << msg;
+        LOG("INFO", "[%s] %s", layerPrefix, msg);
     }
     return VK_FALSE;
 }
@@ -104,9 +100,9 @@ void createDebugCallback(Vulkan& vk) {
         (PFN_vkCreateDebugReportCallbackEXT)
         vkGetInstanceProcAddr(vk.handle, "vkCreateDebugReportCallbackEXT");
     if (create == nullptr) {
-        LOG(WARNING) << "couldn't load debug callback creation function";
+        WARN("couldn't load debug callback creation function");
     } else {
-        checkSuccess(
+        VKCHECK(
             create(
                 vk.handle,
                 &debugReportCallbackCreateInfo,
@@ -125,26 +121,26 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
 
     uint32_t layerCount = 0;
     vector<VkLayerProperties> layers;
-    checkSuccess(
+    VKCHECK(
         vkEnumerateInstanceLayerProperties(
             &layerCount,
             NULL
         )
     );
     layers.resize(layerCount);
-    checkSuccess(
+    VKCHECK(
         vkEnumerateInstanceLayerProperties( 
             &layerCount,
             layers.data()
         )
     );
     for (auto& layer: layers) {
-        LOG(INFO) << "available layer: " << layer.layerName;
+        INFO("available layer: %s", layer.layerName);
     }
 
     uint32_t extensionCount = 0;
     vector<VkExtensionProperties> availableExtensions;
-    checkSuccess(
+    VKCHECK(
         vkEnumerateInstanceExtensionProperties(
             NULL,
             &extensionCount,
@@ -152,7 +148,7 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
         )
     )
     availableExtensions.resize(extensionCount);
-    checkSuccess(
+    VKCHECK(
         vkEnumerateInstanceExtensionProperties(
             NULL,
             &extensionCount,
@@ -188,8 +184,7 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
             }
         }
         if (!found) {
-            LOG(ERROR) << "extension " << requestedExtension << " not available";
-            exit(-1);
+            FATAL("extension %s not available", requestedExtension.c_str());
         }
     }
 
@@ -213,16 +208,16 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
     
     VkResult result = vkCreateInstance(&createInfo, nullptr, &vk.handle);
     if (result == VK_ERROR_INITIALIZATION_FAILED) {
-        LOG(ERROR) << "VK initialization failed";
+        ERR("VK initialization failed");
     } else if (result == VK_ERROR_LAYER_NOT_PRESENT) {
-        LOG(ERROR) << "layer not present";
+        ERR("layer not present");
     } else if (result == VK_ERROR_EXTENSION_NOT_PRESENT) {
-        LOG(ERROR) << "extension not present";
+        ERR("extension not present");
     } else if (result == VK_ERROR_INCOMPATIBLE_DRIVER) {
-        LOG(ERROR) << "driver not compatible";
+        ERR("driver not compatible");
     }
     if (result != VK_SUCCESS) {
-        LOG(ERROR) << "vkCreateInstance failed";
+        ERR("vkCreateInstance failed");
         exit(-1);
     }
 
@@ -234,11 +229,11 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
 
 void pickGPU(Vulkan& vk) {
     uint32_t gpuCount = 0;
-    checkSuccess(vkEnumeratePhysicalDevices(vk.handle, &gpuCount, nullptr));
-    LOG(INFO) << gpuCount << " physical device(s)";
+    VKCHECK(vkEnumeratePhysicalDevices(vk.handle, &gpuCount, nullptr));
+    INFO("%d physical device(s)", gpuCount);
 
     vector<VkPhysicalDevice> gpus(gpuCount);
-    checkSuccess(vkEnumeratePhysicalDevices(vk.handle, &gpuCount, gpus.data()));
+    VKCHECK(vkEnumeratePhysicalDevices(vk.handle, &gpuCount, gpus.data()));
 
     for (auto gpu: gpus) {
         bool hasGraphicsQueue = false;
@@ -340,7 +335,7 @@ void pickGPU(Vulkan& vk) {
 
         if (hasGraphicsQueue) {
             vk.gpu = gpu;
-            LOG(INFO) << "selected physical device " << props.deviceName;
+            INFO("selected physical device %s", props.deviceName);
             return;
         }
     }
@@ -351,7 +346,7 @@ void pickGPU(Vulkan& vk) {
 PFN_vkVoidFunction getFunction(Vulkan& vk, const char* name) {
     auto result = vkGetDeviceProcAddr(vk.device, name);
     if (result == NULL) {
-        LOG(ERROR) << "could not find " << name;
+        ERR("could not find %s", name);
         exit(-1);
     }
     return result;
@@ -408,7 +403,7 @@ void createDevice(Vulkan& vk) {
     createInfo.enabledExtensionCount = (uint32_t)extensions.size();
     createInfo.ppEnabledExtensionNames = extensions.data();
 
-    checkSuccess(vkCreateDevice(vk.gpu, &createInfo, nullptr, &vk.device));
+    VKCHECK(vkCreateDevice(vk.gpu, &createInfo, nullptr, &vk.device));
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
 }
 
@@ -500,7 +495,7 @@ void createRenderPass(
     createInfo.dependencyCount = 1;
     createInfo.pDependencies = &dependency;
 
-    checkSuccess(vkCreateRenderPass(
+    VKCHECK(vkCreateRenderPass(
         vk.device, &createInfo, nullptr, &renderPass
     ));
 }

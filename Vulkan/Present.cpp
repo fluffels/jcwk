@@ -48,7 +48,7 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdss) {
     presentInfo.waitSemaphoreCount = 1;
     presentInfo.pWaitSemaphores = &vk.swap.cmdBufferDone;
     presentInfo.pImageIndices = &imageIndex;
-    checkSuccess(vkQueuePresentKHR(vk.queue, &presentInfo));
+    VKCHECK(vkQueuePresentKHR(vk.queue, &presentInfo));
 
     vkDeviceWaitIdle(vk.device);
 }

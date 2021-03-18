@@ -5,8 +5,6 @@
 #include <iostream>
 #include <vector>
 
-#include "easylogging++.h"
-
 #define readStruct(f, s) fread_s(&s, sizeof(s), sizeof(s), 1, f)
 
 bool fexists(char* path);

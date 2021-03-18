@@ -6,18 +6,14 @@
 
 #include <vulkan/vulkan.h>
 
-#include "easylogging++.h"
 #include "SPIRV-Reflect/spirv_reflect.h"
 
 using std::string;
 using std::runtime_error;
 using std::vector;
 
-#define checkSuccess(r) \
-    if (r != VK_SUCCESS) { \
-        LOG(ERROR) << __FILE__ << ":" << __LINE__; \
-        exit(-1); \
-    }
+#define VKCHECK(x, ...)\
+    if (x != VK_SUCCESS) { exit(-1); }
 
 struct VulkanBuffer {
     VkBuffer handle;

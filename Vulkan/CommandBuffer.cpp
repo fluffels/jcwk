@@ -88,7 +88,7 @@ void createCommandBuffers(
     allocInfo.commandPool = pool;
     allocInfo.commandBufferCount = count;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    checkSuccess(vkAllocateCommandBuffers(
+    VKCHECK(vkAllocateCommandBuffers(
         device,
         &allocInfo,
         buffers.data()

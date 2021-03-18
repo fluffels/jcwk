@@ -72,7 +72,7 @@ void createDescriptorLayout(
     descriptors.bindingCount = (uint32_t)bindings.size();
     descriptors.pBindings = bindings.data();
     
-    checkSuccess(vkCreateDescriptorSetLayout(
+    VKCHECK(vkCreateDescriptorSetLayout(
         vk.device,
         &descriptors,
         nullptr,
@@ -121,7 +121,7 @@ void createDescriptorPool(
         createInfo.poolSizeCount = sizes.size();
         createInfo.pPoolSizes = sizes.data();
 
-        checkSuccess(vkCreateDescriptorPool(
+        VKCHECK(vkCreateDescriptorPool(
             vk.device,
             &createInfo,
             nullptr,
@@ -139,7 +139,7 @@ void allocateDescriptorSet(Vulkan& vk, VulkanPipeline& pipeline) {
         allocateInfo.descriptorPool = pipeline.descriptorPool;
         allocateInfo.descriptorSetCount = 1;
         allocateInfo.pSetLayouts = &pipeline.descriptorLayout;
-        checkSuccess(vkAllocateDescriptorSets(
+        VKCHECK(vkAllocateDescriptorSets(
             vk.device,
             &allocateInfo,
             &pipeline.descriptorSet
@@ -172,7 +172,7 @@ void createShaderModule(
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     createInfo.codeSize = code.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    checkSuccess(vkCreateShaderModule(
+    VKCHECK(vkCreateShaderModule(
         vk.device,
         &createInfo,
         nullptr,
@@ -183,10 +183,10 @@ void createShaderModule(
 void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
     auto accessResult = _access_s(path.c_str(), 4);
     if (accessResult == EACCES) {
-        LOG(ERROR) << "file '" << path << "': access denied";
+        ERR("file '%s': access denied", path.c_str());
         exit(-1);
     } else if (accessResult == ENOENT) {
-        LOG(ERROR) << "file '" << path << "': file not found";
+        ERR("file '%s': file not found", path.c_str());
         exit(-1);
     }
     auto code = readFile(path);
@@ -211,7 +211,7 @@ void createPipelineLayout(Vulkan& vk, vector<VulkanShader>& shaders, VulkanPipel
     createInfo.pSetLayouts = &pipeline.descriptorLayout;
     createInfo.pushConstantRangeCount = pushConstantRanges.size();
     createInfo.pPushConstantRanges = pushConstantRanges.data();
-    checkSuccess(vkCreatePipelineLayout(
+    VKCHECK(vkCreatePipelineLayout(
         vk.device,
         &createInfo,
         nullptr,
@@ -407,7 +407,7 @@ void createPipeline(
     createInfo.layout = pipeline.layout;
     createInfo.subpass = 0;
     
-    checkSuccess(vkCreateGraphicsPipelines(
+    VKCHECK(vkCreateGraphicsPipelines(
         vk.device,
         VK_NULL_HANDLE,
         1,
@@ -439,7 +439,7 @@ void initVKPipeline(
     } else if (fexists(meshFile)) {
         createShaderModule(vk, meshFile, shaders[0]);
     } else {
-        LOG(ERROR) << "pipeline '" << name << "' has no vert/mesh shader";
+        ERR("pipeline '%s' has no vert/mesh shader", name);
         exit(-1);
     }
 

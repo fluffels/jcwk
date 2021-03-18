@@ -19,14 +19,14 @@ void allocateVulkanBuffer(
     allocateInfo.allocationSize = requirements.size;
     allocateInfo.memoryTypeIndex = typeIndex;
 
-    checkSuccess(vkAllocateMemory(
+    VKCHECK(vkAllocateMemory(
         device,
         &allocateInfo,
         nullptr,
         &buffer.memory
     ));
 
-    checkSuccess(vkBindBufferMemory(
+    VKCHECK(vkBindBufferMemory(
         device,
         buffer.handle,
         buffer.memory,
@@ -49,7 +49,7 @@ void createVulkanBuffer(
     createInfo.pQueueFamilyIndices = &queueFamily;
     createInfo.size = size;
 
-    checkSuccess(vkCreateBuffer(
+    VKCHECK(vkCreateBuffer(
         device,
         &createInfo,
         nullptr,
@@ -67,7 +67,7 @@ void createVulkanBufferView(
     info.buffer = buffer.handle;
     info.format = format;
     info.range = VK_WHOLE_SIZE;
-    checkSuccess(vkCreateBufferView(
+    VKCHECK(vkCreateBufferView(
         device,
         &info,
         nullptr,

@@ -5,7 +5,7 @@ VkSemaphore createSemaphore(VkDevice device) {
 
     VkSemaphoreCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-    checkSuccess(vkCreateSemaphore(
+    VKCHECK(vkCreateSemaphore(
         device,
         &createInfo,
         nullptr,

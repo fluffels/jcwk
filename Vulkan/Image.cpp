@@ -22,7 +22,7 @@ void allocateVulkanImage(
         nullptr,
         &memory
     );
-    checkSuccess(result);
+    VKCHECK(result);
 
     vkBindImageMemory(device, image, memory, 0);
 }
@@ -56,7 +56,7 @@ void createImage(
     createInfo.samples = samples;
 
     auto code = vkCreateImage(device, &createInfo, nullptr, &image);
-    checkSuccess(code);
+    VKCHECK(code);
 }
 
 void createSampler(
@@ -79,7 +79,7 @@ void createSampler(
     // createInfo.mipLodBias = ;
 
     auto code = vkCreateSampler(device, &createInfo, nullptr, &sampler);
-    checkSuccess(code);
+    VKCHECK(code);
 }
 
 void createView(
@@ -104,7 +104,7 @@ void createView(
     createInfo.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
 
     auto code = vkCreateImageView(device, &createInfo, nullptr, &view);
-    checkSuccess(code);
+    VKCHECK(code);
 }
 
 void createVulkanImage(
