@@ -25,7 +25,7 @@ void present(Vulkan& vk, VkCommandBuffer* cmds, u32 cmdCount) {
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = cmdCount;
-    submitInfo.pCommandBuffers = cmds;
+    submitInfo.pCommandBuffers = cmds + imageIndex;
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = &vk.swap.imageReady;
     VkPipelineStageFlags waitStages[] = {
