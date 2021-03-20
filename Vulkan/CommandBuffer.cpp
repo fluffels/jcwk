@@ -79,10 +79,8 @@ void createCommandBuffers(
     VkDevice device,
     VkCommandPool pool,
     uint32_t count,
-    vector<VkCommandBuffer>& buffers
+    VkCommandBuffer* buffers
 ) {
-    buffers.resize(count);
-
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.commandPool = pool;
@@ -91,6 +89,6 @@ void createCommandBuffers(
     VKCHECK(vkAllocateCommandBuffers(
         device,
         &allocInfo,
-        buffers.data()
+        buffers
     ));
 }
