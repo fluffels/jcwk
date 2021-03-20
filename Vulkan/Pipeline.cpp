@@ -439,8 +439,7 @@ void initVKPipeline(
     } else if (fexists(meshFile)) {
         createShaderModule(vk, meshFile, shaders[0]);
     } else {
-        ERR("pipeline '%s' has no vert/mesh shader", name);
-        exit(-1);
+        FATAL("pipeline '%s' has no vert/mesh shader", name);
     }
 
     createShaderModule(vk, fragFile, shaders[1]);
