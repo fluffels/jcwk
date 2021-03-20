@@ -1,7 +1,5 @@
 #include <math.h>
 
-#include "easylogging++.h"
-
 #include "MathLib.h"
 
 static inline float toRadians(float d) {
@@ -178,7 +176,7 @@ static inline float quaternionMagnitude(Quaternion& q) {
 }
 
 static inline void quaternionLog(Quaternion& q) {
-    LOG(INFO) << quaternionMagnitude(q) << " " << q.w << " " << q.x << " " << q.y << " " << q.z;
+    INFO("%f %f %f %f %f", quaternionMagnitude(q), q.w, q.x, q.y, q.z);
 }
 
 static inline void quaternionNormalize(Quaternion& q) {
