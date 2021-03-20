@@ -1,7 +1,5 @@
 #include "Win32/Controller.h"
 
-#define DI_CHECK(e, m) if (e != DI_OK) throw new std::exception(m)
-
 const long JOYSTICK_MIN = 0;
 const long JOYSTICK_MAX = 1000000;
 const long JOYSTICK_RANGE = JOYSTICK_MAX - JOYSTICK_MIN;
@@ -13,7 +11,7 @@ BOOL objectCallback(
 ) {
     auto controller = (Controller*)pvRef;
     DIDEVICEOBJECTINSTANCE object = *lpddoi;
-    LOG(INFO) << "found a controller object: " << object.tszName;
+    INFO("found a controller object: %s", object.tszName);
     DIOBJECTDATAFORMAT dataFormat = {};
     if (object.guidType == GUID_XAxis) {
         dataFormat.pguid = &GUID_XAxis;

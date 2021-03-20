@@ -5,7 +5,7 @@ BOOL deviceCallback(
     LPVOID pvRef
 ) {
     DIDEVICEINSTANCE device = *lpddi;
-    LOG(INFO) << "found a controller: " << device.tszInstanceName;
+    INFO("found a controller: %s", device.tszInstanceName);
     ((DirectInput*)pvRef)->controllerGUID = device.guidInstance;
     ((DirectInput*)pvRef)->controllerFound = true;
     return DIENUM_STOP;

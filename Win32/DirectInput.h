@@ -3,12 +3,10 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
-#include "easylogging++.h"
-
 #include "Controller.h"
 #include "Mouse.h"
 
-#define DI_CHECK(e, m) if (e != DI_OK) throw new std::exception(m)
+#define DI_CHECK(e, m) if (e != DI_OK) { FATAL(m); }
 
 struct DirectInput {
     IDirectInput8* di;

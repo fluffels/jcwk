@@ -2,8 +2,6 @@
 
 #include <exception>
 
-#define DI_CHECK(e, m) if (e != DI_OK) throw new std::exception(m)
-
 Mouse::Mouse(IDirectInput8* directInput) {
     auto result = directInput->CreateDevice(GUID_SysMouse, &device, NULL);
     DI_CHECK(result, "could not create mouse");
