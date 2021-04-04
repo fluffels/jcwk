@@ -55,6 +55,8 @@ struct Vulkan {
     vector<string> layers;
     VkQueue queue;
     uint32_t queueFamily;
+    VkQueue computeQueue;
+    uint32_t computeQueueFamily;
     VkPhysicalDeviceMemoryProperties memories;
 
 // TODO(jan): more flexible handling of multiple render passes
