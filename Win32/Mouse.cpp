@@ -1,4 +1,4 @@
-#include "Win32/Mouse.h"
+#include "Mouse.h"
 
 #include <exception>
 

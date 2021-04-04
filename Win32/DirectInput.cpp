@@ -1,4 +1,4 @@
-#include "Win32/DirectInput.h"
+#include "DirectInput.h"
 
 BOOL deviceCallback(
     LPCDIDEVICEINSTANCE lpddi,

@@ -1,4 +1,4 @@
-#include "Win32/Controller.h"
+#include "Controller.h"
 
 const long JOYSTICK_MIN = 0;
 const long JOYSTICK_MAX = 1000000;
