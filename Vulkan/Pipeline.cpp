@@ -183,11 +183,9 @@ void createShaderModule(
 void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
     auto accessResult = _access_s(path.c_str(), 4);
     if (accessResult == EACCES) {
-        ERR("file '%s': access denied", path.c_str());
-        exit(-1);
+        FATAL("file '%s': access denied", path.c_str());
     } else if (accessResult == ENOENT) {
-        ERR("file '%s': file not found", path.c_str());
-        exit(-1);
+        FATAL("file '%s': file not found", path.c_str());
     }
     auto code = readFile(path);
     createShaderModule(vk, code, shader);
