@@ -299,3 +299,114 @@ static inline void getZAxis(Quaternion& q, float* v) {
     v[1] = m[6];
     v[2] = m[10];
 }
+
+static inline void rotor3Init(Rotor3& r) {
+    r.a = 1;
+    r.b01 = 0;
+    r.b02 = 0;
+    r.b12 = 0;
+}
+
+static inline void rotor3Copy(const Rotor3& src, Rotor3& dst) {
+    dst.a = src.a;
+    dst.b01 = src.b01;
+    dst.b02 = src.b02;
+    dst.b12 = src.b12;
+}
+
+static inline void rotorInvert(const Rotor3& src, Rotor3& dst) {
+    dst.a = src.a;
+    dst.b01 = -src.b01;
+    dst.b02 = -src.b02;
+    dst.b12 = -src.b12;
+}
+
+static inline void biVec3Init(BiVec3& b) {
+    b.b01 = 0;
+    b.b02 = 0;
+    b.b12 = 0;
+}
+
+static inline void rotor3FromAnglePlane(float d, BiVec3& p, Rotor3& r) {
+    float sinA = sinf(d / 2.f);
+    r.a = cosf(d / 2.f);
+    r.b01 = -sinA * p.b01;
+    r.b02 = -sinA * p.b02;
+    r.b12 = -sinA * p.b12;
+}
+
+static inline void rotorXY(float d, Rotor3& r) {
+    auto rad = toRadians(d);
+
+    BiVec3 plane;
+    biVec3Init(plane);
+    plane.b01 = 1;
+
+    rotor3FromAnglePlane(rad, plane, r);
+}
+
+static inline void rotorXZ(float d, Rotor3& r) {
+    auto rad = toRadians(d);
+
+    BiVec3 plane;
+    biVec3Init(plane);
+    plane.b02 = 1;
+
+    rotor3FromAnglePlane(rad, plane, r);
+}
+
+static inline void rotorYZ(float d, Rotor3& r) {
+    auto rad = toRadians(d);
+
+    BiVec3 plane;
+    biVec3Init(plane);
+    plane.b12 = 1;
+
+    rotor3FromAnglePlane(rad, plane, r);
+}
+
+static inline void rotorMultiply(Rotor3 p, Rotor3 q, Rotor3& r) {
+	r.a = p.a * q.a 
+		- p.b01 * q.b01 - p.b02 * q.b02 - p.b12 * q.b12;
+
+	r.b01 = p.b01 * q.a   + p.a   * q.b01
+		  + p.b12 * q.b02 - p.b02 * q.b12;
+
+	r.b02 = p.b02 * q.a   + p.a   * q.b02
+		  - p.b12 * q.b01 + p.b01 * q.b12;
+
+	r.b12 = p.b12 * q.a   + p.a   * q.b12
+		  + p.b02 * q.b01 - p.b01 * q.b02;
+}
+
+static inline void rotorRotate(Rotor3 p, Rotor3 q, Rotor3& r) {
+    Rotor3 a;
+    rotorMultiply(q, p, a);
+    Rotor3 i;
+    rotorInvert(q, i);
+    rotorMultiply(a, i, r);
+}
+
+static inline void rotorRotateXY(float d, Rotor3& r) {
+    Rotor3 q;
+    rotorXY(d, q);
+    Rotor3 p;
+    rotor3Copy(r, p);
+    rotorMultiply(p, q, r);
+}
+
+static inline void rotorRotateXZ(float d, Rotor3& r) {
+    Rotor3 q;
+    rotorXZ(d, q);
+    Rotor3 p;
+    rotor3Copy(r, p);
+    rotorMultiply(p, q, r);
+}
+
+static inline void rotorRotateYZ(float d, Rotor3& r) {
+    Rotor3 q;
+    rotorYZ(d, q);
+    Rotor3 p;
+    rotor3Copy(r, p);
+    rotorMultiply(p, q, r);
+}
