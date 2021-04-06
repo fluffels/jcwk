@@ -33,3 +33,16 @@ struct Quaternion {
     float z;
     float w;
 };
+
+struct BiVec3 {
+    float b01;
+    float b02;
+    float b12;
+};
+
+struct Rotor3 {
+    float a;
+    float b01;
+    float b02;
+    float b12;
+};
