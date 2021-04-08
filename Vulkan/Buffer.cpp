@@ -75,7 +75,7 @@ void createVulkanBufferView(
     ));
 }
 
-void createComputeResultsBuffer(
+void createComputeToTextureBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     uint32_t queueFamily,
@@ -85,6 +85,20 @@ void createComputeResultsBuffer(
     auto usage =
         VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    createVulkanBuffer(device, queueFamily, usage, size, buffer);
+    allocateVulkanBuffer(device, memories, buffer);
+}
+
+void createComputeToVertexBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+) {
+    auto usage =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     createVulkanBuffer(device, queueFamily, usage, size, buffer);
     allocateVulkanBuffer(device, memories, buffer);
 }
