@@ -244,6 +244,10 @@ void createCommandBuffers(
     uint32_t count,
     vector<VkCommandBuffer>& buffers
 );
+void submitCommandBuffer(
+    VkCommandBuffer& cmd,
+    VkQueue& queue
+);
 
 // Images & Samplers
 void createPrepassImage(

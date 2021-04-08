@@ -569,6 +569,7 @@ void initVK(Vulkan& vk) {
 
 #include "Vulkan/Buffer.cpp"
 #include "Vulkan/CommandBuffer.cpp"
+#include "Vulkan/Compute.cpp"
 #include "Vulkan/Descriptors.cpp"
 #include "Vulkan/Image.cpp"
 #include "Vulkan/Memory.cpp"
