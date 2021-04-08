@@ -92,3 +92,27 @@ void createCommandBuffers(
         buffers
     ));
 }
+
+void submitCommandBuffer(
+    VkCommandBuffer& cmd,
+    VkQueue& queue
+) {
+    VkSubmitInfo i = {};
+    i.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    i.pNext = nullptr;
+    i.commandBufferCount = 1;
+    i.pCommandBuffers = &cmd;
+    i.signalSemaphoreCount = 0;
+    i.pSignalSemaphores = nullptr;
+    i.waitSemaphoreCount = 0;
+    i.pWaitSemaphores = 0;
+    i.pWaitDstStageMask = nullptr;
+
+    auto result = vkQueueSubmit(
+        queue,
+        1,
+        &i,
+        VK_NULL_HANDLE
+    );
+    VKCHECK(result);
+}
