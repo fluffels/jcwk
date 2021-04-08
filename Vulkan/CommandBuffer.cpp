@@ -186,3 +186,31 @@ void acceptBufferOwnership(
     endCommandBuffer(cmd);
     submitCommandBuffer(cmd, queue);
 }
+
+void transferBufferOwnership(
+    VkDevice device,
+    VkCommandPool srcPool,
+    VkCommandPool dstPool,
+    VkQueue srcQueue,
+    VkQueue dstQueue,
+    VkBuffer buffer,
+    uint32_t srcQueueFamily,
+    uint32_t dstQueueFamily,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask
+) {
+    releaseBufferOwnership(
+        device,
+        srcPool, srcQueue,
+        buffer,
+        srcQueueFamily, dstQueueFamily,
+        srcStageMask, dstStageMask
+    );
+    acceptBufferOwnership(
+        device,
+        dstPool, dstQueue,
+        buffer,
+        srcQueueFamily, dstQueueFamily,
+        srcStageMask, dstStageMask
+    );
+}
