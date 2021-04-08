@@ -248,6 +248,16 @@ void submitCommandBuffer(
     VkCommandBuffer& cmd,
     VkQueue& queue
 );
+void transferBufferOwnership(
+    VkDevice device,
+    VkCommandPool pool,
+    VkQueue queue,
+    VkBuffer buffer,
+    uint32_t srcQueueFamily,
+    uint32_t dstQueueFamily,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask
+);
 
 // Images & Samplers
 void createPrepassImage(

@@ -116,3 +116,39 @@ void submitCommandBuffer(
     );
     VKCHECK(result);
 }
+
+void transferBufferOwnership(
+    VkDevice device,
+    VkCommandPool pool,
+    VkQueue queue,
+    VkBuffer buffer,
+    uint32_t srcQueueFamily,
+    uint32_t dstQueueFamily,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask
+) {
+    VkBufferMemoryBarrier barrier = {};
+    barrier.sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER;
+    barrier.pNext = nullptr;
+    barrier.buffer = buffer;
+    barrier.offset = 0;
+    barrier.size = VK_WHOLE_SIZE;
+    barrier.srcQueueFamilyIndex = srcQueueFamily;
+    barrier.dstQueueFamilyIndex = dstQueueFamily;
+    barrier.srcAccessMask = VK_ACCESS_SHADER_WRITE_BIT;
+    barrier.dstAccessMask = 0;
+
+    VkCommandBuffer cmd = allocateCommandBuffer(device, pool);
+    beginOneOffCommandBuffer(cmd);
+    vkCmdPipelineBarrier(
+        cmd,
+        srcStageMask,
+        dstStageMask,
+        0,
+        0, nullptr,
+        1, &barrier,
+        0, nullptr
+    );
+    endCommandBuffer(cmd);
+    submitCommandBuffer(cmd, queue);
+}
