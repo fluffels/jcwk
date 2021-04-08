@@ -70,6 +70,7 @@ struct Vulkan {
 
     VkCommandPool cmdPool;
     VkCommandPool cmdPoolTransient;
+    VkCommandPool cmdPoolComputeTransient;
 
     bool supportsMeshShaders;
     bool supportsQueryPools;

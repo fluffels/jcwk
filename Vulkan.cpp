@@ -564,6 +564,7 @@ void initVK(Vulkan& vk) {
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);
     vk.cmdPoolTransient = createCommandPool(vk.device, vk.queueFamily, true);
+    vk.cmdPoolComputeTransient = createCommandPool(vk.device, vk.computeQueueFamily, true);
 }
 
 #include "Vulkan/Buffer.cpp"
