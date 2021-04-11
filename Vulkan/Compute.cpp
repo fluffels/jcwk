@@ -19,12 +19,7 @@ void dispatchCompute(
         0, 1, &pipeline.descriptorSet,
         0, nullptr
     );
-    vkCmdDispatch(
-        cmd,
-        1,
-        1,
-        1
-    );
+    vkCmdDispatch(cmd, x, y, z);
     endCommandBuffer(cmd);
     submitCommandBuffer(cmd, vk.computeQueue);
 }
