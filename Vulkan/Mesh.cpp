@@ -16,7 +16,7 @@ void uploadMesh(
         mesh.vBuff
     );
 
-    void* memory = mapMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapBufferMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(memory, data, size);
     unMapMemory(device, mesh.vBuff.memory);
 }
@@ -39,7 +39,7 @@ void uploadMesh(
         mesh.vBuff
     );
 
-    void* memory = mapMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapBufferMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(memory, vertices, verticesSize);
     unMapMemory(device, mesh.vBuff.memory);
 
@@ -51,7 +51,7 @@ void uploadMesh(
         mesh.iBuff
     );
 
-    memory = mapMemory(device, mesh.iBuff.handle, mesh.iBuff.memory);
+    memory = mapBufferMemory(device, mesh.iBuff.handle, mesh.iBuff.memory);
         memcpy(memory, indices, indicesSize);
     unMapMemory(device, mesh.iBuff.memory);
 }

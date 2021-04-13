@@ -44,7 +44,7 @@ Controller::Controller(IDirectInput8* directInput, GUID guid):
     DI_CHECK(result, "could not create controller");
 
     result = device->EnumObjects(
-        objectCallback,
+        (LPDIENUMDEVICEOBJECTSCALLBACKA)objectCallback,
         this,
         0
     );

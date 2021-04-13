@@ -136,7 +136,7 @@ void createVulkanImage(
         image.handle
     );
 
-    auto reqs = getMemoryRequirements(device, image.handle);
+    auto reqs = getImageMemoryRequirements(device, image.handle);
     auto flags =
         hostVisible? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : 0;
     auto memType = selectMemoryTypeIndex(memories, reqs, flags);
@@ -427,7 +427,7 @@ void createTextureFromBuffer(
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
-    vkQueueSubmit(queue, 1, &submitInfo, nullptr);
+    vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void uploadTexture(
@@ -451,7 +451,7 @@ void uploadTexture(
         staging
     );
 
-    void* dst = mapMemory(device, staging.handle, staging.memory);
+    void* dst = mapBufferMemory(device, staging.handle, staging.memory);
         memcpy(dst, data, size);
     unMapMemory(device, staging.memory);
 
