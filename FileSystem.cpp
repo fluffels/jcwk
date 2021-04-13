@@ -8,6 +8,20 @@ fexists(char* path) {
     return accessResult != ENOENT;
 }
 
+FILE*
+openFile(char* path, char* mode) {
+    FILE* result;
+    errno_t errorCode;
+    #if WIN32
+    errorCode = fopen_s(&result, path, mode);
+    LERROR(errorCode != 0);
+    #else
+    result = fopen(path, mode);
+    LERROR(result != NULL);
+    #endif
+    return result;
+}
+
 std::vector<char>
 readFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
@@ -24,6 +38,20 @@ readFile(const std::filesystem::path& path) {
     file.read(buffer.data(), size);
     file.close();
     return buffer;
+}
+
+size_t
+readFromFile(FILE* file, size_t bufferSize, void* buffer) {
+    size_t readCount;
+    #if WIN32
+    readCount = fread_s(buffer, bufferSize, 1, bufferSize, file);
+    #else
+    readCount = fread(buffer, 1, bufferSize, file);
+    #endif
+    if (readCount < bufferSize) {
+        LERROR(ferror(file));
+    }
+    return readCount;
 }
 
 void
