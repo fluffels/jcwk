@@ -1,25 +1,35 @@
 #pragma once
 
-static FILE* LOG_FILE;
+LARGE_INTEGER counterEpoch;
+LARGE_INTEGER counterFrequency;
+static FILE* logFile;
 
-#ifndef TIME
-#define TIME()
-#endif
+float GetElapsed() {
+    LARGE_INTEGER t;
+    QueryPerformanceCounter(&t);
+    auto result =
+        (t.QuadPart - counterEpoch.QuadPart)
+        / (float)counterFrequency.QuadPart;
+    return result;
+}
+
+#define TIME()\
+    fprintf(logFile, "[%f]", GetElapsed());
 
 #define LOC()\
-    fprintf(LOG_FILE, "[%s:%d]", __FILE__, __LINE__);
+    fprintf(logFile, "[%s:%d]", __FILE__, __LINE__);
 
 #define LOG(level, ...)\
     LOC()\
     TIME()\
-    fprintf(LOG_FILE, "[%s] ", level);\
-    fprintf(LOG_FILE, __VA_ARGS__); \
-    fprintf(LOG_FILE, "\n"); \
-    fflush(LOG_FILE);
+    fprintf(logFile, "[%s] ", level);\
+    fprintf(logFile, __VA_ARGS__); \
+    fprintf(logFile, "\n"); \
+    fflush(logFile);
 
 #define FATAL(...)\
     LOG("FATAL", __VA_ARGS__); \
-    fclose(LOG_FILE);\
+    fclose(logFile);\
     exit(1);
 
 #define WARN(...) LOG("WARN", __VA_ARGS__);
@@ -38,3 +48,11 @@ static FILE* LOG_FILE;
         strerror_s(buffer, x); \
         FATAL(buffer); \
     }
+
+void initLogging() {
+    auto error = fopen_s(&logFile, "LOG", "w");
+    if (error) exit(-1);
+
+    QueryPerformanceCounter(&counterEpoch);
+    QueryPerformanceFrequency(&counterFrequency);
+}
