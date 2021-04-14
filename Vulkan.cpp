@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include "Logging.h"
+#include "MathLib.cpp"
 #include "Vulkan.h"
 
 using std::runtime_error;
@@ -564,7 +566,11 @@ void initVK(Vulkan& vk) {
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);
     vk.cmdPoolTransient = createCommandPool(vk.device, vk.queueFamily, true);
+#ifdef VULKAN_COMPUTE
     vk.cmdPoolComputeTransient = createCommandPool(vk.device, vk.computeQueueFamily, true);
+#else
+    vk.cmdPoolComputeTransient = VK_NULL_HANDLE;
+#endif
 }
 
 #include "Vulkan/Buffer.cpp"

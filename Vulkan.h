@@ -241,7 +241,7 @@ void createCommandBuffers(
     VkDevice device,
     VkCommandPool pool,
     uint32_t count,
-    vector<VkCommandBuffer>& buffers
+    VkCommandBuffer* buffers
 );
 void submitCommandBuffer(
     VkCommandBuffer& cmd,
@@ -385,5 +385,6 @@ void uploadMesh(
 // Present
 void present(
     Vulkan& vk,
-    vector<vector<VkCommandBuffer>>& cmdss
+    VkCommandBuffer* cmdss,
+    uint32_t cmdCount
 );
