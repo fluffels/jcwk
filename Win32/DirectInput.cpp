@@ -1,4 +1,4 @@
-#include "Win32/DirectInput.h"
+#include "DirectInput.h"
 
 BOOL deviceCallback(
     LPCDIDEVICEINSTANCE lpddi,
@@ -27,7 +27,7 @@ DirectInput::DirectInput(HINSTANCE instance):
 
     result = di->EnumDevices(
         DI8DEVCLASS_GAMECTRL,
-        deviceCallback,
+        (LPDIENUMDEVICESCALLBACKA)deviceCallback,
         this,
         0
     );

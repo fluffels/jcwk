@@ -136,7 +136,7 @@ void createVulkanImage(
         image.handle
     );
 
-    auto reqs = getMemoryRequirements(device, image.handle);
+    auto reqs = getImageMemoryRequirements(device, image.handle);
     auto flags =
         hostVisible? VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT : 0;
     auto memType = selectMemoryTypeIndex(memories, reqs, flags);
@@ -325,7 +325,7 @@ void createPrepassImage(
     );
 }
 
-void uploadTexture(
+void createTextureFromBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     VkQueue queue,
@@ -333,25 +333,11 @@ void uploadTexture(
     VkCommandPool cmdPoolTransient,
     uint32_t width,
     uint32_t height,
-    void* data,
     uint32_t size,
+    VulkanBuffer& staging,
     VulkanSampler& sampler
 ) {
     VkExtent2D extent = { width, height };
-
-    VulkanBuffer staging;
-    createStagingBuffer(
-        device,
-        memories,
-        queueFamily,
-        size,
-        staging
-    );
-
-    void* dst = mapMemory(device, staging.handle, staging.memory);
-        memcpy(dst, data, size);
-    unMapMemory(device, staging.memory);
-
     createVulkanSampler2D(
         device, memories, extent, queueFamily, sampler
     );
@@ -441,5 +427,42 @@ void uploadTexture(
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
-    vkQueueSubmit(queue, 1, &submitInfo, nullptr);
+    vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+}
+
+void uploadTexture(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkQueue queue,
+    uint32_t queueFamily,
+    VkCommandPool cmdPoolTransient,
+    uint32_t width,
+    uint32_t height,
+    void* data,
+    uint32_t size,
+    VulkanSampler& sampler
+) {
+    VulkanBuffer staging;
+    createStagingBuffer(
+        device,
+        memories,
+        queueFamily,
+        size,
+        staging
+    );
+
+    void* dst = mapBufferMemory(device, staging.handle, staging.memory);
+        memcpy(dst, data, size);
+    unMapMemory(device, staging.memory);
+
+    createTextureFromBuffer(
+        device,
+        memories,
+        queue,
+        queueFamily,
+        cmdPoolTransient,
+        width, height, size,
+        staging,
+        sampler
+    );
 }

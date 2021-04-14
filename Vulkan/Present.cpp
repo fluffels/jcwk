@@ -4,7 +4,7 @@
 
 #undef max
 
-void present(Vulkan& vk, VkCommandBuffer* cmds, u32 cmdCount) {
+void present(Vulkan& vk, VkCommandBuffer* cmds, uint32_t cmdCount) {
     uint32_t imageIndex = 0;
     auto result = vkAcquireNextImageKHR(
         vk.device,
@@ -25,7 +25,7 @@ void present(Vulkan& vk, VkCommandBuffer* cmds, u32 cmdCount) {
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = cmdCount;
-    submitInfo.pCommandBuffers = cmds + imageIndex;
+    submitInfo.pCommandBuffers = cmds + (imageIndex * cmdCount);
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = &vk.swap.imageReady;
     VkPipelineStageFlags waitStages[] = {
@@ -34,7 +34,7 @@ void present(Vulkan& vk, VkCommandBuffer* cmds, u32 cmdCount) {
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = &vk.swap.cmdBufferDone;
-    vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
+    vkQueueSubmit(vk.queue, 1, &submitInfo, VK_NULL_HANDLE);
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

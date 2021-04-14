@@ -1,4 +1,4 @@
-#include "Win32/Controller.h"
+#include "Controller.h"
 
 const long JOYSTICK_MIN = 0;
 const long JOYSTICK_MAX = 1000000;
@@ -44,7 +44,7 @@ Controller::Controller(IDirectInput8* directInput, GUID guid):
     DI_CHECK(result, "could not create controller");
 
     result = device->EnumObjects(
-        objectCallback,
+        (LPDIENUMDEVICEOBJECTSCALLBACKA)objectCallback,
         this,
         0
     );

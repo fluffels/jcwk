@@ -55,6 +55,8 @@ struct Vulkan {
     vector<string> layers;
     VkQueue queue;
     uint32_t queueFamily;
+    VkQueue computeQueue;
+    uint32_t computeQueueFamily;
     VkPhysicalDeviceMemoryProperties memories;
 
 // TODO(jan): more flexible handling of multiple render passes
@@ -68,6 +70,7 @@ struct Vulkan {
 
     VkCommandPool cmdPool;
     VkCommandPool cmdPoolTransient;
+    VkCommandPool cmdPoolComputeTransient;
 
     bool supportsMeshShaders;
     bool supportsQueryPools;
@@ -119,11 +122,10 @@ uint32_t selectMemoryTypeIndex(
     VkMemoryRequirements,
     VkMemoryPropertyFlags
 );
-VkMemoryRequirements getMemoryRequirements(VkDevice, VkBuffer);
-VkMemoryRequirements getMemoryRequirements(VkDevice, VkImage);
-void* mapMemory(VkDevice, VkMemoryRequirements, VkDeviceMemory);
-void* mapMemory(VkDevice, VkImage, VkDeviceMemory);
-void* mapMemory(VkDevice, VkBuffer, VkDeviceMemory);
+VkMemoryRequirements getBufferMemoryRequirements(VkDevice device, VkBuffer buffer);
+VkMemoryRequirements getImageMemoryRequirements(VkDevice device, VkImage image);
+void* mapBufferMemory(VkDevice device, VkBuffer buffer, VkDeviceMemory memory);
+void* mapImageMemory(VkDevice device, VkImage image, VkDeviceMemory memory);
 void unMapMemory(VkDevice, VkDeviceMemory);
 
 // Synchronization
@@ -239,7 +241,21 @@ void createCommandBuffers(
     VkDevice device,
     VkCommandPool pool,
     uint32_t count,
-    vector<VkCommandBuffer>& buffers
+    VkCommandBuffer* buffers
+);
+void submitCommandBuffer(
+    VkCommandBuffer& cmd,
+    VkQueue& queue
+);
+void transferBufferOwnership(
+    VkDevice device,
+    VkCommandPool pool,
+    VkQueue queue,
+    VkBuffer buffer,
+    uint32_t srcQueueFamily,
+    uint32_t dstQueueFamily,
+    VkPipelineStageFlags srcStageMask,
+    VkPipelineStageFlags dstStageMask
 );
 
 // Images & Samplers
@@ -369,5 +385,6 @@ void uploadMesh(
 // Present
 void present(
     Vulkan& vk,
-    vector<vector<VkCommandBuffer>>& cmdss
+    VkCommandBuffer* cmdss,
+    uint32_t cmdCount
 );

@@ -3,6 +3,8 @@
 
 #include <stdexcept>
 
+#include "Logging.h"
+#include "MathLib.cpp"
 #include "Vulkan.h"
 
 using std::runtime_error;
@@ -237,6 +239,9 @@ void pickGPU(Vulkan& vk) {
 
     for (auto gpu: gpus) {
         bool hasGraphicsQueue = false;
+#ifdef VULKAN_COMPUTE
+        bool hasComputeQueue = false;
+#endif
 
         VkPhysicalDeviceProperties props = {};
         vkGetPhysicalDeviceProperties(gpu, &props);
@@ -331,9 +336,19 @@ void pickGPU(Vulkan& vk) {
                     vk.queueFamily = index;
                 }
             }
+#ifdef VULKAN_COMPUTE
+            if (queue.queueFlags & VK_QUEUE_COMPUTE_BIT) {
+                hasComputeQueue = true;
+                vk.computeQueueFamily = index;
+            }
+#endif
         }
 
+#ifdef VULKAN_COMPUTE
+        if (hasGraphicsQueue && hasComputeQueue) {
+#else
         if (hasGraphicsQueue) {
+#endif
             vk.gpu = gpu;
             INFO("selected physical device %s", props.deviceName);
             return;
@@ -361,13 +376,29 @@ void getFunctions(Vulkan& vk) {
 void createDevice(Vulkan& vk) {
     vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 
-    float prio = 1.f;
-    VkDeviceQueueCreateInfo queue = {};
-    queue.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue.queueCount = 1;
-    queue.queueFamilyIndex = vk.queueFamily;
-    queue.pQueuePriorities = &prio;
-    queueCreateInfos.push_back(queue);
+    {
+        VkDeviceQueueCreateInfo q = {};
+        q.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        q.queueCount = 1;
+        q.queueFamilyIndex = vk.queueFamily;
+        float prio = 1.f;
+        q.pQueuePriorities = &prio;
+        queueCreateInfos.push_back(q);
+    }
+
+#ifdef VULKAN_COMPUTE
+    {
+        VkDeviceQueueCreateInfo q = {};
+        q.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        q.pNext = nullptr;
+        q.flags = 0;
+        float prio = 1.f;
+        q.pQueuePriorities = &prio;
+        q.queueCount = 1;
+        q.queueFamilyIndex = vk.computeQueueFamily;
+        queueCreateInfos.push_back(q);
+    }
+#endif
 
     vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
@@ -405,6 +436,9 @@ void createDevice(Vulkan& vk) {
 
     VKCHECK(vkCreateDevice(vk.gpu, &createInfo, nullptr, &vk.device));
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
+#ifdef VULKAN_COMPUTE
+    vkGetDeviceQueue(vk.device, vk.computeQueueFamily, 0, &vk.computeQueue);
+#endif
 }
 
 void createRenderPass(
@@ -532,10 +566,16 @@ void initVK(Vulkan& vk) {
     createFramebuffers(vk);
     vk.cmdPool = createCommandPool(vk.device, vk.queueFamily);
     vk.cmdPoolTransient = createCommandPool(vk.device, vk.queueFamily, true);
+#ifdef VULKAN_COMPUTE
+    vk.cmdPoolComputeTransient = createCommandPool(vk.device, vk.computeQueueFamily, true);
+#else
+    vk.cmdPoolComputeTransient = VK_NULL_HANDLE;
+#endif
 }
 
 #include "Vulkan/Buffer.cpp"
 #include "Vulkan/CommandBuffer.cpp"
+#include "Vulkan/Compute.cpp"
 #include "Vulkan/Descriptors.cpp"
 #include "Vulkan/Image.cpp"
 #include "Vulkan/Memory.cpp"

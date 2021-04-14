@@ -5,7 +5,7 @@ void allocateVulkanBuffer(
     VkPhysicalDeviceMemoryProperties memories,
     VulkanBuffer& buffer
 ) {
-    auto requirements = getMemoryRequirements(device, buffer.handle);
+    auto requirements = getBufferMemoryRequirements(device, buffer.handle);
     auto extraFlags = (
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
         VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
@@ -73,6 +73,34 @@ void createVulkanBufferView(
         nullptr,
         &buffer.view
     ));
+}
+
+void createComputeToTextureBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+) {
+    auto usage =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    createVulkanBuffer(device, queueFamily, usage, size, buffer);
+    allocateVulkanBuffer(device, memories, buffer);
+}
+
+void createComputeToVertexBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+) {
+    auto usage =
+        VK_BUFFER_USAGE_STORAGE_BUFFER_BIT |
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    createVulkanBuffer(device, queueFamily, usage, size, buffer);
+    allocateVulkanBuffer(device, memories, buffer);
 }
 
 void createStorageBuffer(
@@ -163,7 +191,7 @@ void updateBuffer(
     void* data,
     size_t length
 ) {
-    auto dst = mapMemory(vk.device, buffer.handle, buffer.memory);
+    auto dst = mapBufferMemory(vk.device, buffer.handle, buffer.memory);
         memcpy(dst, data, length);
     unMapMemory(vk.device, buffer.memory);
 }
@@ -185,7 +213,7 @@ void uploadStorageBuffer(
     VulkanBuffer& buffer
 ) {
     createStorageBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }
@@ -199,7 +227,7 @@ void uploadTexelBuffer(
     VulkanBuffer& buffer
 ) {
     createTexelBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }
@@ -213,7 +241,7 @@ void uploadIndexBuffer(
     VulkanBuffer& buffer
 ) {
     createIndexBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }

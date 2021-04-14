@@ -183,11 +183,9 @@ void createShaderModule(
 void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
     auto accessResult = _access_s(path.c_str(), 4);
     if (accessResult == EACCES) {
-        ERR("file '%s': access denied", path.c_str());
-        exit(-1);
+        FATAL("file '%s': access denied", path.c_str());
     } else if (accessResult == ENOENT) {
-        ERR("file '%s': file not found", path.c_str());
-        exit(-1);
+        FATAL("file '%s': file not found", path.c_str());
     }
     auto code = readFile(path);
     createShaderModule(vk, code, shader);
@@ -486,4 +484,45 @@ void initVKPipelineNoCull(
     defaultOptions(options);
     options.cullBackFaces = false;
     initVKPipeline(vk, name, options, pipeline);
+}
+
+void initVKPipelineCompute(
+    Vulkan& vk,
+    char* name,
+    VulkanPipeline& pipeline
+) {
+    vector<VulkanShader> shaders(1);
+    auto& shader = shaders[0];
+    char computeFile[255];
+    sprintf_s(computeFile, "shaders/%s.comp.spv", name);
+    createShaderModule(vk, computeFile, shader);
+
+    createDescriptorLayout(vk, shaders, pipeline);
+    createDescriptorPool(vk, shaders, pipeline);
+    allocateDescriptorSet(vk, pipeline);
+    createPipelineLayout(vk, shaders, pipeline);
+
+    VkComputePipelineCreateInfo create = {};
+    create.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+    create.pNext = nullptr;
+    create.flags = 0;
+    create.basePipelineHandle = 0;
+    create.basePipelineIndex = 0;
+    create.layout = pipeline.layout;
+    create.stage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    create.stage.flags = 0;
+    create.stage.pNext = nullptr;
+    create.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
+    create.stage.module = shader.module;
+    create.stage.pName = shader.reflect.entry_point_name;
+    create.stage.pSpecializationInfo = nullptr;
+
+    vkCreateComputePipelines(
+        vk.device,
+        VK_NULL_HANDLE,
+        1,
+        &create,
+        nullptr,
+        &pipeline.handle
+    );
 }
