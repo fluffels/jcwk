@@ -299,13 +299,10 @@ void createVulkanSamplerCube(
     VulkanSampler&
 );
 void uploadTexture(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    VkQueue queue,
-    uint32_t queueFamily,
-    VkCommandPool cmdPoolTransient,
+    Vulkan& vk,
     uint32_t width,
     uint32_t height,
+    VkFormat format,
     void* data,
     uint32_t size,
     VulkanSampler& sampler

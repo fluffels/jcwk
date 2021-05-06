@@ -253,27 +253,6 @@ void createVulkanSampler(
     );
 }
 
-void createVulkanSampler2D(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    VkExtent2D extent,
-    uint32_t family,
-    VulkanSampler& sampler
-) {
-    createVulkanSampler(
-        device,
-        memories,
-        VK_IMAGE_TYPE_2D,
-        VK_IMAGE_VIEW_TYPE_2D,
-        extent,
-        1,
-        family,
-        0,
-        VK_SAMPLE_COUNT_1_BIT,
-        sampler
-    );
-}
-
 void createVulkanSamplerCube(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
@@ -325,25 +304,16 @@ void createPrepassImage(
     );
 }
 
-void createTextureFromBuffer(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    VkQueue queue,
-    uint32_t queueFamily,
-    VkCommandPool cmdPoolTransient,
+void copyBufferToTexture(
+    Vulkan vk,
     uint32_t width,
     uint32_t height,
-    uint32_t size,
-    VulkanBuffer& staging,
-    VulkanSampler& sampler
+    VulkanBuffer& buffer,
+    VulkanImage& image
 ) {
     VkExtent2D extent = { width, height };
-    createVulkanSampler2D(
-        device, memories, extent, queueFamily, sampler
-    );
-    auto& image = sampler.image;
 
-    auto cmd = allocateCommandBuffer(device, cmdPoolTransient);
+    auto cmd = allocateCommandBuffer(vk.device, vk.cmdPoolTransient);
     beginOneOffCommandBuffer(cmd);
 
     {
@@ -387,7 +357,7 @@ void createTextureFromBuffer(
 
         vkCmdCopyBufferToImage(
             cmd,
-            staging.handle,
+            buffer.handle,
             image.handle,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1, &region
@@ -427,42 +397,55 @@ void createTextureFromBuffer(
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
-    vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueSubmit(vk.queue, 1, &submitInfo, VK_NULL_HANDLE);
 }
 
 void uploadTexture(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    VkQueue queue,
-    uint32_t queueFamily,
-    VkCommandPool cmdPoolTransient,
+    Vulkan& vk,
     uint32_t width,
     uint32_t height,
+    VkFormat format,
     void* data,
     uint32_t size,
     VulkanSampler& sampler
 ) {
     VulkanBuffer staging;
     createStagingBuffer(
-        device,
-        memories,
-        queueFamily,
+        vk.device,
+        vk.memories,
+        vk.queueFamily,
         size,
         staging
     );
 
-    void* dst = mapBufferMemory(device, staging.handle, staging.memory);
+    void* dst = mapBufferMemory(vk.device, staging.handle, staging.memory);
         memcpy(dst, data, size);
-    unMapMemory(device, staging.memory);
+    unMapMemory(vk.device, staging.memory);
 
-    createTextureFromBuffer(
-        device,
-        memories,
-        queue,
-        queueFamily,
-        cmdPoolTransient,
-        width, height, size,
-        staging,
-        sampler
+    createVulkanImage(
+        vk.device,
+        vk.memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_2D,
+        { width, height},
+        1,
+        vk.queueFamily,
+        format,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+        VK_IMAGE_ASPECT_COLOR_BIT,
+        false,
+        0,
+        VK_SAMPLE_COUNT_1_BIT,
+        sampler.image
+    );
+    createSampler(
+        vk.device,
+        sampler.handle
+    );
+
+    copyBufferToTexture(
+        vk,
+        width, height,
+        staging, sampler.image
     );
 }
