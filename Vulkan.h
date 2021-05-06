@@ -124,9 +124,8 @@ uint32_t selectMemoryTypeIndex(
 );
 VkMemoryRequirements getBufferMemoryRequirements(VkDevice device, VkBuffer buffer);
 VkMemoryRequirements getImageMemoryRequirements(VkDevice device, VkImage image);
-void* mapBufferMemory(VkDevice device, VkBuffer buffer, VkDeviceMemory memory);
-void* mapImageMemory(VkDevice device, VkImage image, VkDeviceMemory memory);
-void unMapMemory(VkDevice, VkDeviceMemory);
+void* mapMemory(VkDevice device, VkDeviceMemory memory);
+void unMapMemory(VkDevice device, VkDeviceMemory memory);
 
 // Synchronization
 VkSemaphore createSemaphore(VkDevice device);
