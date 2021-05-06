@@ -185,6 +185,18 @@ void createTexelBuffer(
     );
 }
 
+void destroyBuffer(
+    Vulkan& vk,
+    VulkanBuffer& buffer
+) {
+    if (buffer.memory != VK_NULL_HANDLE) {
+        vkFreeMemory(vk.device, buffer.memory, nullptr);
+    }
+    if (buffer.handle != VK_NULL_HANDLE) {
+        vkDestroyBuffer(vk.device, buffer.handle, nullptr);
+    }
+}
+
 void updateBuffer(
     Vulkan& vk,
     VulkanBuffer& buffer,
