@@ -118,6 +118,22 @@ static inline void matrixMultiply(float* m, float* n, float* r) {
     }
 }
 
+static inline void matrixOrtho(
+    uint32_t screenWidth,
+    uint32_t screenHeight,
+    float* m
+) {
+    matrixInit(m);
+
+    const float ar = screenWidth / (float)screenHeight;
+
+    m[0] = 2.f / screenWidth;
+    m[12] = -1;
+    m[5] = 2.f / screenHeight;
+    m[13] = -1;
+    m[10] = 0;
+}
+
 static inline void matrixProjection(
     uint32_t screenWidth,
     uint32_t screenHeight,
