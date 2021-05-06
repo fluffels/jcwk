@@ -2,34 +2,42 @@
 
 #include <cstdint>
 
+#include "Types.h"
+
 #define PI 3.14159265358979323846f
 
 struct Vec2i {
-    int32_t x;
-    int32_t y;
+    i32 x;
+    i32 y;
 };
 
 struct Vec2 {
-    float x;
-    float y;
+    f32 x;
+    f32 y;
+};
+
+struct Vec3i {
+    i32 x;
+    i32 y;
+    i32 z;
 };
 
 struct Vec3 {
-    float x;
-    float y;
-    float z;
+    f32 x;
+    f32 y;
+    f32 z;
 };
 
 struct Vec4 {
-    float x;
-    float y;
-    float z;
-    float w;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
 };
 
 struct Quaternion {
-    float x;
-    float y;
-    float z;
-    float w;
+    f32 x;
+    f32 y;
+    f32 z;
+    f32 w;
 };
