@@ -371,7 +371,7 @@ void createPipeline(
                                 VK_COLOR_COMPONENT_G_BIT |
                                 VK_COLOR_COMPONENT_B_BIT |
                                 VK_COLOR_COMPONENT_A_BIT;
-    colorBlend.blendEnable = VK_FALSE;
+    colorBlend.blendEnable = VK_TRUE;
     colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
     colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
     colorBlend.colorBlendOp = VK_BLEND_OP_ADD;
