@@ -418,7 +418,7 @@ void uploadTexture(
         staging
     );
 
-    void* dst = mapBufferMemory(vk.device, staging.handle, staging.memory);
+    void* dst = mapMemory(vk.device, staging.memory);
         memcpy(dst, data, size);
     unMapMemory(vk.device, staging.memory);
 

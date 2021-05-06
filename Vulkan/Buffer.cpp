@@ -203,7 +203,7 @@ void updateBuffer(
     void* data,
     size_t length
 ) {
-    auto dst = mapBufferMemory(vk.device, buffer.handle, buffer.memory);
+    auto dst = mapMemory(vk.device, buffer.memory);
         memcpy(dst, data, length);
     unMapMemory(vk.device, buffer.memory);
 }
@@ -225,7 +225,7 @@ void uploadStorageBuffer(
     VulkanBuffer& buffer
 ) {
     createStorageBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapMemory(device, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }
@@ -239,7 +239,7 @@ void uploadTexelBuffer(
     VulkanBuffer& buffer
 ) {
     createTexelBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapMemory(device, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }
@@ -253,7 +253,7 @@ void uploadIndexBuffer(
     VulkanBuffer& buffer
 ) {
     createIndexBuffer(device, memories, queueFamily, size, buffer);
-    void* memory = mapBufferMemory(device, buffer.handle, buffer.memory);
+    void* memory = mapMemory(device, buffer.memory);
         memcpy(memory, data, size);
     unMapMemory(device, buffer.memory);
 }

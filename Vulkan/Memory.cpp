@@ -23,7 +23,6 @@ VkMemoryRequirements getBufferMemoryRequirements(VkDevice device, VkBuffer buffe
     return requirements;
 }
 
-
 VkMemoryRequirements getImageMemoryRequirements(VkDevice device, VkImage image) {
     VkMemoryRequirements requirements = {};
     vkGetImageMemoryRequirements(
@@ -59,7 +58,6 @@ uint32_t selectMemoryTypeIndex(
 
 void* mapMemory(
     VkDevice device,
-    VkMemoryRequirements requirements,
     VkDeviceMemory memory
 ) {
     void* data = 0;
@@ -76,24 +74,6 @@ void* mapMemory(
         throw runtime_error("could not map vertex memory");
     }
     return data;
-}
-
-void* mapBufferMemory(
-    VkDevice device,
-    VkBuffer buffer,
-    VkDeviceMemory memory
-) {
-    auto requirements = getBufferMemoryRequirements(device, buffer);
-    return mapMemory(device, requirements, memory);
-}
-
-void* mapImageMemory(
-    VkDevice device,
-    VkImage image,
-    VkDeviceMemory memory
-) {
-    auto requirements = getImageMemoryRequirements(device, image);
-    return mapMemory(device, requirements, memory);
 }
 
 void unMapMemory(VkDevice device, VkDeviceMemory memory) {
