@@ -14,7 +14,7 @@ void uploadMesh(
         mesh.vBuff
     );
 
-    void* memory = mapBufferMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapMemory(vk.device, mesh.vBuff.memory);
         memcpy(memory, data, size);
     unMapMemory(vk.device, mesh.vBuff.memory);
 }
@@ -35,7 +35,7 @@ void uploadMesh(
         mesh.vBuff
     );
 
-    void* memory = mapBufferMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapMemory(vk.device, mesh.vBuff.memory);
         memcpy(memory, vertices, verticesSize);
     unMapMemory(vk.device, mesh.vBuff.memory);
 
@@ -47,7 +47,15 @@ void uploadMesh(
         mesh.iBuff
     );
 
-    memory = mapBufferMemory(vk.device, mesh.iBuff.handle, mesh.iBuff.memory);
+    memory = mapMemory(vk.device, mesh.iBuff.memory);
         memcpy(memory, indices, indicesSize);
     unMapMemory(vk.device, mesh.iBuff.memory);
+}
+
+void destroyMesh(
+    Vulkan& vk,
+    VulkanMesh& mesh
+) {
+    destroyBuffer(vk, mesh.vBuff);
+    destroyBuffer(vk, mesh.iBuff);
 }
