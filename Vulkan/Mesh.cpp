@@ -1,30 +1,26 @@
 #include "Vulkan.h"
 
 void uploadMesh(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    uint32_t queueFamily,
+    Vulkan& vk,
     void* data,
     uint32_t size,
     VulkanMesh& mesh
 ) {
     createVertexBuffer(
-        device,
-        memories,
-        queueFamily,
+        vk.device,
+        vk.memories,
+        vk.queueFamily,
         size,
         mesh.vBuff
     );
 
-    void* memory = mapBufferMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapBufferMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(memory, data, size);
-    unMapMemory(device, mesh.vBuff.memory);
+    unMapMemory(vk.device, mesh.vBuff.memory);
 }
 
 void uploadMesh(
-    VkDevice device,
-    VkPhysicalDeviceMemoryProperties& memories,
-    uint32_t queueFamily,
+    Vulkan& vk,
     void* vertices,
     uint32_t verticesSize,
     void* indices,
@@ -32,26 +28,26 @@ void uploadMesh(
     VulkanMesh& mesh
 ) {
     createVertexBuffer(
-        device,
-        memories,
-        queueFamily,
+        vk.device,
+        vk.memories,
+        vk.queueFamily,
         verticesSize,
         mesh.vBuff
     );
 
-    void* memory = mapBufferMemory(device, mesh.vBuff.handle, mesh.vBuff.memory);
+    void* memory = mapBufferMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(memory, vertices, verticesSize);
-    unMapMemory(device, mesh.vBuff.memory);
+    unMapMemory(vk.device, mesh.vBuff.memory);
 
     createIndexBuffer(
-        device,
-        memories,
-        queueFamily,
+        vk.device,
+        vk.memories,
+        vk.queueFamily,
         indicesSize,
         mesh.iBuff
     );
 
-    memory = mapBufferMemory(device, mesh.iBuff.handle, mesh.iBuff.memory);
+    memory = mapBufferMemory(vk.device, mesh.iBuff.handle, mesh.iBuff.memory);
         memcpy(memory, indices, indicesSize);
-    unMapMemory(device, mesh.iBuff.memory);
+    unMapMemory(vk.device, mesh.iBuff.memory);
 }
