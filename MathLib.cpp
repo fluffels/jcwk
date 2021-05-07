@@ -16,6 +16,14 @@ static inline float toRadians(float d) {
     return (d / 180.f) * PI;
 }
 
+static inline bool vectorEquals(Vec3i& lhs, Vec3i& rhs) {
+    bool result = true;
+    if (lhs.x != rhs.x) result = false;
+    if (lhs.y != rhs.y) result = false;
+    if (lhs.z != rhs.z) result = false;
+    return result;
+}
+
 static inline void vectorCross(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.y*b.z - a.z*b.y;
     r.y = a.z*b.x - a.x*b.z;
