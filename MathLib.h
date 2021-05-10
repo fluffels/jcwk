@@ -35,6 +35,13 @@ struct Vec4 {
     f32 w;
 };
 
+struct Vec4i {
+    i32 x;
+    i32 y;
+    i32 z;
+    i32 w;
+};
+
 struct Quaternion {
     f32 x;
     f32 y;
