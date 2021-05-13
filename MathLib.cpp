@@ -126,6 +126,12 @@ static inline void matrixMultiply(float* m, float* n, float* r) {
     }
 }
 
+static inline void matrixMultiplyPoint(const float* m, Vec3& v, Vec3& r) {
+    r.x = m[0]*v.x + m[4]*v.y + m[8]*v.z + m[12];
+    r.y = m[1]*v.x + m[5]*v.y + m[9]*v.z + m[13];
+    r.z = m[2]*v.x + m[6]*v.y + m[10]*v.z + m[14];
+}
+
 static inline void matrixOrtho(
     uint32_t screenWidth,
     uint32_t screenHeight,
@@ -332,4 +338,14 @@ static inline void getZAxis(Quaternion& q, float* v) {
     v[0] = m[2];
     v[1] = m[6];
     v[2] = m[10];
+}
+
+static inline void rotatePoint(Quaternion& q, Vec3& p, Vec3& result) {
+    Quaternion qConj = quaternionInverse(q);
+    Quaternion qPos = {p.x, p.y, p.z, 0 };
+
+    Quaternion qTmp = quaternionMultiply(q, qPos);
+    Quaternion r = quaternionMultiply(qTmp, qConj);
+
+    result = { r.x, r.y, r.z };
 }
