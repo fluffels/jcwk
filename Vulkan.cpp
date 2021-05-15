@@ -219,8 +219,7 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
         ERR("driver not compatible");
     }
     if (result != VK_SUCCESS) {
-        ERR("vkCreateInstance failed");
-        exit(-1);
+        FATAL("vkCreateInstance failed");
     }
 
     createDebugCallback(vk);
