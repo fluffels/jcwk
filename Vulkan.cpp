@@ -121,23 +121,40 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
     vkEnumerateInstanceVersion(&version);
     checkVersion(version);
 
+    vk.layers.push_back("VK_LAYER_KHRONOS_validation");
     uint32_t layerCount = 0;
     vector<VkLayerProperties> layers;
     VKCHECK(
         vkEnumerateInstanceLayerProperties(
             &layerCount,
             NULL
-        )
+        ),
+        "could not fetch count of available layers"
     );
     layers.resize(layerCount);
     VKCHECK(
         vkEnumerateInstanceLayerProperties( 
             &layerCount,
             layers.data()
-        )
+        ),
+        "could not fetch available layers"
     );
     for (auto& layer: layers) {
         INFO("available layer: %s", layer.layerName);
+    }
+    for (auto& requestedLayer: vk.layers) {
+        const char* requestedString = requestedLayer.c_str();
+        bool found = false;
+        for (auto& availableLayer: layers) {
+            const char* availableString = availableLayer.layerName;
+            if (strcmp(requestedString, availableString) == 0) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            FATAL("layer %s is not available", requestedString);
+        }
     }
 
     uint32_t extensionCount = 0;
@@ -189,8 +206,6 @@ void createVKInstance(Vulkan& vk, vector<string>* appExtensions) {
             FATAL("extension %s not available", requestedExtension.c_str());
         }
     }
-
-    vk.layers.push_back("VK_LAYER_KHRONOS_validation");
 
     VkApplicationInfo app = {};
     app.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
