@@ -9,7 +9,7 @@ fexists(char* path) {
 }
 
 FILE*
-openFile(char* path, char* mode) {
+openFile(const char* path, const char* mode) {
     FILE* result;
     errno_t errorCode;
     #if WIN32
