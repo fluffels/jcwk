@@ -414,7 +414,7 @@ void createDevice(Vulkan& vk) {
     }
 #endif
 
-    vector<char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
+    vector<const char*> extensions({ VK_KHR_SWAPCHAIN_EXTENSION_NAME });
 
 #ifdef VULKAN_MESH_SHADER
 //TODO(jan): enabling this flag breaks RenderDoc
