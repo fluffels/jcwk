@@ -12,7 +12,7 @@ FILE*
 openFile(const char* path, const char* mode) {
     FILE* result;
     errno_t errorCode;
-    #if WIN32
+    #ifdef WIN32
     errorCode = fopen_s(&result, path, mode);
     LERROR(errorCode != 0);
     #else
@@ -26,7 +26,7 @@ std::vector<char>
 readFile(const std::filesystem::path& path) {
     std::ifstream file(path, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
-        #if WIN32
+        #ifdef WIN32
         ERR("could not open %ls", path.c_str());
         #else
         ERR("could not open %s", path.c_str());
@@ -43,7 +43,7 @@ readFile(const std::filesystem::path& path) {
 size_t
 readFromFile(FILE* file, size_t bufferSize, void* buffer) {
     size_t readCount;
-    #if WIN32
+    #ifdef WIN32
     readCount = fread_s(buffer, bufferSize, 1, bufferSize, file);
     #else
     readCount = fread(buffer, 1, bufferSize, file);

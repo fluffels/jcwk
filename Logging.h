@@ -46,7 +46,7 @@ float GetElapsed() {
     if (x) {      \
         char buffer[1024]; \
         strerror_s(buffer, x); \
-        FATAL(buffer); \
+        FATAL("%s", buffer); \
     }
 
 void initLogging() {
