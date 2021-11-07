@@ -3,7 +3,7 @@
 
 #include "SPIRV-Reflect/spirv_reflect.h"
 
-#include <assert.h>
+#include <cassert>
 #include <io.h>
 #include <map>
 
@@ -13,6 +13,9 @@
 using std::map;
 
 struct PipelineOptions {
+    const char* name;
+    const char* vertexShaderPath;
+    const char* fragmentShaderPath;
     bool clockwiseWinding;
     bool cullBackFaces;
     VkPrimitiveTopology topology;
