@@ -251,7 +251,7 @@ void describeInputAttributes(
 void createPipeline(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
-    const PipelineOptions& options,
+    const PipelineInfo& options,
     VulkanPipeline& pipeline
 ) {
     pipeline.options = options;
@@ -405,22 +405,22 @@ void createPipeline(
 
 void initVKPipeline(
     Vulkan& vk,
-    const PipelineOptions& options,
+    const PipelineInfo& info,
     VulkanPipeline& pipeline
 ) {
     pipeline = {};
 
     vector<VulkanShader> shaders(2);
 
-    if (fexists(options.vertexShaderPath)) {
-        createShaderModule(vk, options.vertexShaderPath, shaders[0]);
-    } else if (fexists(options.meshShaderPath)) {
-        createShaderModule(vk, options.meshShaderPath, shaders[0]);
+    if (fexists(info.vertexShaderPath)) {
+        createShaderModule(vk, info.vertexShaderPath, shaders[0]);
+    } else if (fexists(info.meshShaderPath)) {
+        createShaderModule(vk, info.meshShaderPath, shaders[0]);
     } else {
-        FATAL("pipeline '%s' has no vert/mesh shader", options.name);
+        FATAL("pipeline '%s' has no vert/mesh shader", info.name);
     }
 
-    createShaderModule(vk, options.fragmentShaderPath, shaders[1]);
+    createShaderModule(vk, info.fragmentShaderPath, shaders[1]);
 
     createDescriptorLayout(vk, shaders, pipeline);
     createDescriptorPool(vk, shaders, pipeline);
@@ -429,7 +429,7 @@ void initVKPipeline(
     createPipeline(
         vk,
         shaders,
-        options,
+        info,
         pipeline
     );
 }

@@ -9,7 +9,6 @@
 #include "SPIRV-Reflect/spirv_reflect.h"
 
 using std::string;
-using std::runtime_error;
 using std::vector;
 
 #define VKCHECK(x, ...)\
@@ -87,7 +86,7 @@ struct VulkanShader {
     vector<SpvReflectDescriptorSet*> sets;
 };
 
-struct PipelineOptions {
+struct PipelineInfo {
     const char* name;
     const char* vertexShaderPath;
     const char* meshShaderPath;
@@ -98,7 +97,7 @@ struct PipelineOptions {
 };
 
 struct VulkanPipeline {
-    PipelineOptions options;
+    PipelineInfo options;
     VkPipeline handle;
     VkPipelineLayout layout;
     VulkanShader vertexShader;
@@ -329,7 +328,7 @@ void destroyVulkanSampler(
 // Pipeline
 void initVKPipeline(
     Vulkan& vk,
-    const PipelineOptions& options,
+    const PipelineInfo& info,
     VulkanPipeline&
 );
 
