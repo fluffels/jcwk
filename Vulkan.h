@@ -87,6 +87,16 @@ struct VulkanShader {
     vector<SpvReflectDescriptorSet*> sets;
 };
 
+struct PipelineOptions {
+    const char* name;
+    const char* vertexShaderPath;
+    const char* meshShaderPath;
+    const char* fragmentShaderPath;
+    bool clockwiseWinding;
+    bool cullBackFaces;
+    VkPrimitiveTopology topology;
+};
+
 struct VulkanPipeline {
     VkPipeline handle;
     VkPipelineLayout layout;
@@ -316,19 +326,9 @@ void destroyVulkanSampler(
 );
 
 // Pipeline
-void initVKPipelineCCW(
-    Vulkan& vk,
-    char* name,
-    VulkanPipeline&
-);
 void initVKPipeline(
     Vulkan& vk,
-    char* name,
-    VulkanPipeline&
-);
-void initVKPipelineNoCull(
-    Vulkan& vk,
-    char* name,
+    const PipelineOptions& options,
     VulkanPipeline&
 );
 

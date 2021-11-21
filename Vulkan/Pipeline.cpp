@@ -12,23 +12,6 @@
 
 using std::map;
 
-struct PipelineOptions {
-    const char* name;
-    const char* vertexShaderPath;
-    const char* fragmentShaderPath;
-    bool clockwiseWinding;
-    bool cullBackFaces;
-    VkPrimitiveTopology topology;
-};
-
-void defaultOptions(
-    PipelineOptions& options
-) {
-    options.clockwiseWinding = true;
-    options.cullBackFaces = true;
-    options.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-}
-
 void createDescriptorLayout(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
@@ -268,7 +251,7 @@ void describeInputAttributes(
 void createPipeline(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
-    PipelineOptions& options,
+    const PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     bool isMeshPipeline = false;
@@ -420,30 +403,22 @@ void createPipeline(
 
 void initVKPipeline(
     Vulkan& vk,
-    char* name,
-    PipelineOptions& options,
+    const PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
     pipeline = {};
 
     vector<VulkanShader> shaders(2);
 
-    char vertFile[255];
-    sprintf_s(vertFile, "shaders/%s.vert.spv", name);
-    char meshFile[255];
-    sprintf_s(meshFile, "shaders/%s.mesh.spv", name);
-    char fragFile[255];
-    sprintf_s(fragFile, "shaders/%s.frag.spv", name);
-
-    if (fexists(vertFile)) {
-        createShaderModule(vk, vertFile, shaders[0]);
-    } else if (fexists(meshFile)) {
-        createShaderModule(vk, meshFile, shaders[0]);
+    if (fexists(options.vertexShaderPath)) {
+        createShaderModule(vk, options.vertexShaderPath, shaders[0]);
+    } else if (fexists(options.meshShaderPath)) {
+        createShaderModule(vk, options.meshShaderPath, shaders[0]);
     } else {
-        FATAL("pipeline '%s' has no vert/mesh shader", name);
+        FATAL("pipeline '%s' has no vert/mesh shader", options.name);
     }
 
-    createShaderModule(vk, fragFile, shaders[1]);
+    createShaderModule(vk, options.fragmentShaderPath, shaders[1]);
 
     createDescriptorLayout(vk, shaders, pipeline);
     createDescriptorPool(vk, shaders, pipeline);
@@ -455,38 +430,6 @@ void initVKPipeline(
         options,
         pipeline
     );
-}
-
-void initVKPipeline(
-    Vulkan& vk,
-    char* name,
-    VulkanPipeline& pipeline
-) {
-    PipelineOptions options = {};
-    defaultOptions(options);
-    initVKPipeline(vk, name, options, pipeline);
-}
-
-void initVKPipelineCCW(
-    Vulkan& vk,
-    char* name,
-    VulkanPipeline& pipeline
-) {
-    PipelineOptions options = {};
-    defaultOptions(options);
-    options.clockwiseWinding = false;
-    initVKPipeline(vk, name, options, pipeline);
-}
-
-void initVKPipelineNoCull(
-    Vulkan& vk,
-    char* name,
-    VulkanPipeline& pipeline
-) {
-    PipelineOptions options = {};
-    defaultOptions(options);
-    options.cullBackFaces = false;
-    initVKPipeline(vk, name, options, pipeline);
 }
 
 void initVKPipelineCompute(

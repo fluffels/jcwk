@@ -1,0 +1,26 @@
+[src/MainWin32.cpp:62][0.000034][INFO] Logging initialized.
+[.\\lib\\jcwk\Vulkan.cpp:28][0.107441][INFO] Instance version: 1.2.182
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148001][INFO] available layer: VK_LAYER_NV_optimus
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148019][INFO] available layer: VK_LAYER_RENDERDOC_Capture
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148025][INFO] available layer: GalaxyOverlayVkLayer
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148030][INFO] available layer: GalaxyOverlayVkLayer_VERBOSE
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148035][INFO] available layer: GalaxyOverlayVkLayer_DEBUG
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148040][INFO] available layer: VK_LAYER_NV_nomad_release_public_2021_2_1
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148045][INFO] available layer: VK_LAYER_NV_GPU_Trace_release_public_2021_2_1
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148050][INFO] available layer: VK_LAYER_VALVE_steam_overlay
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148054][INFO] available layer: VK_LAYER_VALVE_steam_fossilize
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148059][INFO] available layer: VK_LAYER_EOS_Overlay
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148064][INFO] available layer: VK_LAYER_EOS_Overlay
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148069][INFO] available layer: VK_LAYER_OBS_HOOK
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148073][INFO] available layer: VK_LAYER_OBS_HOOK
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148078][INFO] available layer: VK_LAYER_LUNARG_api_dump
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148083][INFO] available layer: VK_LAYER_LUNARG_device_simulation
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148087][INFO] available layer: VK_LAYER_LUNARG_gfxreconstruct
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148092][INFO] available layer: VK_LAYER_KHRONOS_synchronization2
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148097][INFO] available layer: VK_LAYER_KHRONOS_validation
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148101][INFO] available layer: VK_LAYER_LUNARG_monitor
+[.\\lib\\jcwk\Vulkan.cpp:143][0.148106][INFO] available layer: VK_LAYER_LUNARG_screenshot
+[.\\lib\\jcwk\Vulkan.cpp:249][0.322480][INFO] 1 physical device(s)
+[.\\lib\\jcwk\Vulkan.cpp:367][0.324013][INFO] selected physical device NVIDIA GeForce RTX 3070
+[.\\lib\\jcwk\Vulkan.cpp:46][0.326766][ERROR] [Loader Message] Failed to open dynamic library "C:\ProgramData\obs-studio-hook\.\graphics-hook32.dll" with error 193
+[src/MainWin32.cpp:136][0.545079][INFO] text

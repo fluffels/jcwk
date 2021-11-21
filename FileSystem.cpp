@@ -3,7 +3,7 @@
 #include <io.h>
 
 bool
-fexists(char* path) {
+fexists(const char* path) {
     auto accessResult = _access_s(path, 4);
     return accessResult != ENOENT;
 }
