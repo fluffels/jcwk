@@ -254,6 +254,8 @@ void createPipeline(
     const PipelineOptions& options,
     VulkanPipeline& pipeline
 ) {
+    pipeline.options = options;
+
     bool isMeshPipeline = false;
 
     vector<VkPipelineShaderStageCreateInfo> shaderStages;

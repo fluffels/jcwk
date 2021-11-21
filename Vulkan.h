@@ -98,6 +98,7 @@ struct PipelineOptions {
 };
 
 struct VulkanPipeline {
+    PipelineOptions options;
     VkPipeline handle;
     VkPipelineLayout layout;
     VulkanShader vertexShader;
