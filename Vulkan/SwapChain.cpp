@@ -1,4 +1,5 @@
 #include "Vulkan.h"
+#include "vulkan/vulkan_core.h"
 
 void findSwapFormats(Vulkan& vk) {
     VKCHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
@@ -35,7 +36,7 @@ void findSwapFormats(Vulkan& vk) {
     vk.swap.format = surfaceFormats[0].format;
     vk.swap.colorSpace = surfaceFormats[0].colorSpace;
     for (auto format: surfaceFormats) {
-        if ((format.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) &&
+        if ((format.colorSpace == VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT) &&
                 (format.format == VK_FORMAT_B8G8R8A8_SRGB)) {
             vk.swap.format = format.format;
             vk.swap.colorSpace = format.colorSpace;
