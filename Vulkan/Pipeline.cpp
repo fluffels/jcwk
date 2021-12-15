@@ -347,8 +347,8 @@ void createPipeline(
     VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
     depthStencilCreateInfo.sType =
         VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilCreateInfo.depthTestEnable = VK_TRUE;
-    depthStencilCreateInfo.depthWriteEnable = VK_TRUE;
+    depthStencilCreateInfo.depthTestEnable = options.depthEnabled ? VK_TRUE : VK_FALSE;
+    depthStencilCreateInfo.depthWriteEnable = options.depthEnabled ? VK_TRUE : VK_FALSE;
     depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     // TODO(jan): Experiment with enabling this for better performance.
     depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;

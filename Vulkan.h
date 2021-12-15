@@ -93,6 +93,7 @@ struct PipelineInfo {
     const char* fragmentShaderPath;
     bool clockwiseWinding;
     bool cullBackFaces;
+    bool depthEnabled;
     VkPrimitiveTopology topology;
 };
 
