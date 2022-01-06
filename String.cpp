@@ -38,3 +38,14 @@ allocateString(struct MemoryArena* arena, umm size) {
 
     return result;
 }
+
+struct String
+stringLiteral(const char* s) {
+    struct String result = {
+        .size = strlen(s),
+        .length = strlen(s),
+        .data = (char*)s
+    };
+    
+    return result;
+}
