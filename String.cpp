@@ -2,6 +2,9 @@
 #include <string>
 #include <vector>
 
+#include "Types.h"
+#include "Memory.cpp"
+
 using std::string;
 using std::vector;
 
@@ -17,4 +20,21 @@ cStringToVecOfStrings(
         vec.push_back(s);
         token = strtok(NULL, delim);
     }
+}
+
+struct String {
+    umm size;
+    umm length;
+    char* data;
+};
+
+struct String
+allocateString(struct MemoryArena* arena, umm size) {
+    struct String result = {
+        .size = size,
+        .length = 0,
+        .data = (char*)memoryArenaAllocate(arena, size)
+    };
+
+    return result;
 }
