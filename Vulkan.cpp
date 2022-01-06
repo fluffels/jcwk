@@ -3,7 +3,6 @@
 
 #include <stdexcept>
 
-#include "Logging.h"
 #include "MathLib.cpp"
 #include "Vulkan.h"
 
