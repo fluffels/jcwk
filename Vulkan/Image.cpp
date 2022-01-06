@@ -1,6 +1,7 @@
 #include <stdexcept>
 
 #include "Vulkan.h"
+#include "vulkan/vulkan_core.h"
 
 using std::runtime_error;
 
@@ -448,4 +449,11 @@ void uploadTexture(
         width, height,
         staging, sampler.image
     );
+}
+
+void destroySampler(Vulkan& vk, VulkanSampler& sampler) {
+    vkFreeMemory(vk.device, sampler.image.memory, nullptr);
+    vkDestroySampler(vk.device, sampler.handle, nullptr);
+    vkDestroyImageView(vk.device, sampler.image.view, nullptr);
+    vkDestroyImage(vk.device, sampler.image.handle, nullptr);
 }
