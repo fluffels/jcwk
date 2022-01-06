@@ -12,6 +12,10 @@
 #define min(a, b) a < b? a: b
 #endif
 
+#ifndef isPowerOfTwo
+#define isPowerOfTwo(x) (((x) & ((x) - 1)) == 0)
+#endif
+
 static inline float toRadians(float d) {
     return (d / 180.f) * PI;
 }
