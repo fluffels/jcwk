@@ -58,6 +58,13 @@ static inline void vectorScale(float d, Vec3& v) {
     v.z *= d;
 }
 
+static inline void vectorScale(float d, Vec4& v) {
+    v.x *= d;
+    v.y *= d;
+    v.z *= d;
+    v.w *= d;
+}
+
 static inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x + b.x;
     r.y = a.y + b.y;
