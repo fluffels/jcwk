@@ -7,7 +7,7 @@
 #include <io.h>
 #include <map>
 
-#include "FileSystem.h"
+#include "FileSystem.cpp"
 #include "Vulkan.h"
 
 using std::map;
