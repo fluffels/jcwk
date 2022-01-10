@@ -1,6 +1,10 @@
-#include "FileSystem.h"
+#pragma once
 
+#include <filesystem>
+#include <fstream>
 #include <io.h>
+
+#include "Logging.cpp"
 
 bool
 fexists(const char* path) {
