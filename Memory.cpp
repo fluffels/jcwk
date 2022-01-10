@@ -1,8 +1,9 @@
 #pragma once
 
+#include <stdlib.h>
+
+#include "Logging.cpp"
 #include "Types.h"
-#include <algorithm>
-#include <corecrt_malloc.h>
 
 #ifndef max
 #define max(a, b) a > b? a: b
@@ -31,6 +32,10 @@ MemoryBlock*
 memoryArenaAllocateBlock(umm size) {
     size = max(MIN_BLOCK_SIZE, size);
     void* data = malloc(size);
+
+    if (!data) {
+        FATAL("Could not allocate block of size %llu", size);
+    }
 
     auto* block = (MemoryBlock*)data;
     block->next = nullptr;

@@ -2,6 +2,7 @@
 
 #include <math.h>
 
+#include "Logging.cpp"
 #include "MathLib.h"
 
 #ifndef max
@@ -10,10 +11,6 @@
 
 #ifndef min
 #define min(a, b) a < b? a: b
-#endif
-
-#ifndef isPowerOfTwo
-#define isPowerOfTwo(x) (((x) & ((x) - 1)) == 0)
 #endif
 
 static inline float toRadians(float d) {
