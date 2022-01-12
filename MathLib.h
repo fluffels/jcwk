@@ -48,3 +48,10 @@ struct Quaternion {
     f32 z;
     f32 w;
 };
+
+struct AABox {
+    f32 x0;
+    f32 x1;
+    f32 y0;
+    f32 y1;
+};

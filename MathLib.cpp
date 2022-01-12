@@ -364,3 +364,15 @@ static inline void rotatePoint(Quaternion& q, Vec3& p, Vec3& result) {
 
     result = { r.x, r.y, r.z };
 }
+
+static inline AABox
+offsetAABox(AABox box, Vec2 offset) {
+    AABox result = {};
+
+    result.x0 = box.x0 + offset.x;
+    result.x1 = box.x1 + offset.x;
+    result.y0 = box.y0 + offset.y;
+    result.y1 = box.y1 + offset.y;
+
+    return result;
+}
