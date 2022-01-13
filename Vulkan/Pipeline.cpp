@@ -364,6 +364,7 @@ void createPipeline(
         depthStencilCreateInfo.front.passOp = VK_STENCIL_OP_INVERT;
         depthStencilCreateInfo.front.failOp = VK_STENCIL_OP_INVERT;
         depthStencilCreateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStencilCreateInfo.front.writeMask = 0xff;
         // TODO(jan): What does this do?
         depthStencilCreateInfo.front.reference = 0;
 
@@ -373,6 +374,7 @@ void createPipeline(
         depthStencilCreateInfo.back.passOp = VK_STENCIL_OP_INVERT;
         depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_INVERT;
         depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStencilCreateInfo.back.writeMask = 0xff;
         // TODO(jan): What does this do?
         depthStencilCreateInfo.back.reference = 0;
     }
