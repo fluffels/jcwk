@@ -77,6 +77,7 @@ struct Vulkan {
     PFN_vkCmdDrawMeshTasksNV cmdDrawMeshTasksNV;
 
     VkSampleCountFlags sampleCountFlags;
+    VkSampleCountFlagBits sampleCountFlagBits;
     uint8_t sampleCount;
 };
 
@@ -94,6 +95,7 @@ struct PipelineInfo {
     bool clockwiseWinding;
     bool cullBackFaces;
     bool depthEnabled;
+    bool stencilEnabled = VK_FALSE;
     VkPrimitiveTopology topology;
 };
 
@@ -330,7 +332,8 @@ void destroyVulkanSampler(
 void initVKPipeline(
     Vulkan& vk,
     const PipelineInfo& info,
-    VulkanPipeline&
+    VulkanPipeline& pipeline,
+    VkRenderPass* renderPass = nullptr
 );
 
 // Descriptors

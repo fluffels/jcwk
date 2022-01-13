@@ -67,24 +67,31 @@ void computeSampleCounts(Vulkan& vk) {
         sampleCountFilter;
     if (counts & VK_SAMPLE_COUNT_64_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_64_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_64_BIT;
         vk.sampleCount = 64;
     } else if (counts & VK_SAMPLE_COUNT_32_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_32_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_32_BIT;
         vk.sampleCount = 32;
     } else if (counts & VK_SAMPLE_COUNT_16_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_16_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_16_BIT;
         vk.sampleCount = 16;
     } else if (counts & VK_SAMPLE_COUNT_8_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_8_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_8_BIT;
         vk.sampleCount = 8;
     } else if (counts & VK_SAMPLE_COUNT_4_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_4_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_4_BIT;
         vk.sampleCount = 4;
     } else if (counts & VK_SAMPLE_COUNT_2_BIT) {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_2_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_2_BIT;
         vk.sampleCount = 2;
     } else {
         vk.sampleCountFlags = VK_SAMPLE_COUNT_1_BIT;
+        vk.sampleCountFlagBits = VK_SAMPLE_COUNT_1_BIT;
         vk.sampleCountFlags = 1;
     }
 }
