@@ -355,7 +355,7 @@ void createPipeline(
     // TODO(jan): Experiment with enabling this for better performance.
     depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
 
-    if (info.stencilEnabled) {
+    if (info.writeStencilInvert) {
         depthStencilCreateInfo.stencilTestEnable = VK_TRUE;
 
         depthStencilCreateInfo.front.depthFailOp = info.depthEnabled
@@ -375,6 +375,29 @@ void createPipeline(
         depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_INVERT;
         depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
         depthStencilCreateInfo.back.writeMask = 0xff;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.back.reference = 0;
+    }
+
+    if (info.readStencil) {
+        depthStencilCreateInfo.stencilTestEnable = VK_TRUE;
+
+        depthStencilCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.compareOp = VK_COMPARE_OP_NOT_EQUAL;
+        depthStencilCreateInfo.front.compareMask = 0xff;
+        depthStencilCreateInfo.front.writeMask = 0;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.front.reference = 0;
+
+
+        depthStencilCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_NOT_EQUAL;
+        depthStencilCreateInfo.back.compareMask = 0xff;
+        depthStencilCreateInfo.back.writeMask = 0;
         // TODO(jan): What does this do?
         depthStencilCreateInfo.back.reference = 0;
     }

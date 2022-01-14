@@ -95,7 +95,8 @@ struct PipelineInfo {
     bool clockwiseWinding;
     bool cullBackFaces;
     bool depthEnabled;
-    bool stencilEnabled = VK_FALSE;
+    bool writeStencilInvert = VK_FALSE;
+    bool readStencil = VK_FALSE;
     VkPrimitiveTopology topology;
 };
 
