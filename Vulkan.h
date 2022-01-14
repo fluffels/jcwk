@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 
 #include "SPIRV-Reflect/spirv_reflect.h"
+#include "vulkan/vulkan_core.h"
 
 using std::string;
 using std::vector;
@@ -97,6 +98,8 @@ struct PipelineInfo {
     bool depthEnabled;
     bool writeStencilInvert = VK_FALSE;
     bool readStencil = VK_FALSE;
+    // TODO(jan): Fix this hack.
+    VkSampleCountFlagBits samples = (VkSampleCountFlagBits)0;
     VkPrimitiveTopology topology;
 };
 
