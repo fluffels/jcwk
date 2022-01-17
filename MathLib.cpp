@@ -74,6 +74,11 @@ static inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
     r.z = a.z - b.z;
 }
 
+static inline void vectorInterpolate(Vec2& a, Vec2&b, float c, Vec2& r) {
+    r.x = a.x + (b.x - a.x) * c;
+    r.y = a.y + (b.y - a.y) * c;
+}
+
 static inline void matrixInit(float* m) {
     *m++ = 1;
     *m++ = 0;
