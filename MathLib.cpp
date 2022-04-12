@@ -168,6 +168,20 @@ static inline void matrixOrtho(
     m[10] = 0;
 }
 
+static inline void matrixOrthoCenteredOrigin(
+    f32 width,
+    f32 height,
+    float* m
+) {
+    matrixInit(m);
+
+    const float ar = width / (float)height;
+
+    m[0] = 2.f / width;
+    m[5] = -2.f / height;
+    m[15] = 1;
+}
+
 static inline void matrixProjection(
     uint32_t screenWidth,
     uint32_t screenHeight,
