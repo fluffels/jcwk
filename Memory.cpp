@@ -70,15 +70,22 @@ memoryArenaAllocate(MemoryArena* arena, umm size) {
     if (!memoryArenaTryAllocateFromBlock(arena->last, size, &data)) {
         MemoryBlock* newBlock = memoryArenaAllocateBlock(size);
         arena->last->next = newBlock;
-        memoryArenaTryAllocateFromBlock(arena->last, size, &data);
+        arena->last = newBlock;
+        if (!memoryArenaTryAllocateFromBlock(arena->last, size, &data)) {
+            FATAL("could not allocate");
+        }
     }
 
     return data;
 }
 
+#define memoryArenaAllocateStruct(arena, type) (type*)memoryArenaAllocate(arena, sizeof(type))
+
 void
 memoryArenaClear(MemoryArena* arena) {
     MemoryBlock* block = arena->first;
+
+    if (block == nullptr) return;
 
     do {
         MemoryBlock* next = block->next;
