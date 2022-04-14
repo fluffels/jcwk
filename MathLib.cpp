@@ -197,6 +197,14 @@ static inline void matrixOrthoCenteredOrigin(
     m[15] = 1;
 }
 
+static inline void matrix2DZoom(
+    f32 factor,
+    f32* m
+) {
+    m[0] = factor;
+    m[5] = factor;
+}
+
 static inline void matrixProjection(
     uint32_t screenWidth,
     uint32_t screenHeight,
