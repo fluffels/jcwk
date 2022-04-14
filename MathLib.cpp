@@ -49,6 +49,11 @@ static inline void vectorNormalize(Vec3& v) {
     v.z /= magnitude;
 }
 
+static inline void vectorScale(float d, Vec2& v) {
+    v.x *= d;
+    v.y *= d;
+}
+
 static inline void vectorScale(float d, Vec3& v) {
     v.x *= d;
     v.y *= d;
@@ -62,10 +67,20 @@ static inline void vectorScale(float d, Vec4& v) {
     v.w *= d;
 }
 
+static inline void vectorAdd(const Vec2& a, const Vec2& b, Vec2& r) {
+    r.x = a.x + b.x;
+    r.y = a.y + b.y;
+}
+
 static inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x + b.x;
     r.y = a.y + b.y;
     r.z = a.z + b.z;
+}
+
+static inline void vectorSub(const Vec2& a, const Vec2& b, Vec2& r) {
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
 }
 
 static inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
