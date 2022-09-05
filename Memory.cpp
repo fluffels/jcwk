@@ -26,6 +26,7 @@ const umm MemoryBlockDataOffset = sizeof(MemoryBlock);
 struct MemoryArena {
     MemoryBlock* first;
     MemoryBlock* last;
+    umm size;
 };
 
 MemoryBlock*
@@ -63,6 +64,7 @@ memoryArenaAllocate(MemoryArena* arena, umm size) {
     if (arena->first == nullptr) {
         arena->first = memoryArenaAllocateBlock(size);
         arena->last = arena->first;
+        arena->size = arena->first->size;
     }
 
     void* data = nullptr;
@@ -70,15 +72,23 @@ memoryArenaAllocate(MemoryArena* arena, umm size) {
     if (!memoryArenaTryAllocateFromBlock(arena->last, size, &data)) {
         MemoryBlock* newBlock = memoryArenaAllocateBlock(size);
         arena->last->next = newBlock;
-        memoryArenaTryAllocateFromBlock(arena->last, size, &data);
+        arena->last = newBlock;
+        arena->size += newBlock->size;
+        if (!memoryArenaTryAllocateFromBlock(arena->last, size, &data)) {
+            FATAL("could not allocate");
+        }
     }
 
     return data;
 }
 
+#define memoryArenaAllocateStruct(arena, type) (type*)memoryArenaAllocate(arena, sizeof(type))
+
 void
 memoryArenaClear(MemoryArena* arena) {
     MemoryBlock* block = arena->first;
+
+    if (block == nullptr) return;
 
     do {
         MemoryBlock* next = block->next;
@@ -88,4 +98,28 @@ memoryArenaClear(MemoryArena* arena) {
 
     arena->first = nullptr;
     arena->last = nullptr;
+}
+
+umm
+getMemoryArenaFree(MemoryArena* arena) {
+    MemoryBlock* block = arena->first;
+
+    umm result = 0;
+    while (block != nullptr) {
+        result += block->free;
+        block = block->next;
+    }
+    return result;
+}
+
+umm
+getMemoryArenaUsed(MemoryArena* arena) {
+    MemoryBlock* block = arena->first;
+
+    umm result = 0;
+    while (block != nullptr) {
+        result += block->size - block->free;
+        block = block->next;
+    }
+    return result;
 }

@@ -7,6 +7,7 @@
 #include <vulkan/vulkan.h>
 
 #include "SPIRV-Reflect/spirv_reflect.h"
+#include "vulkan/vulkan_core.h"
 
 using std::string;
 using std::vector;
@@ -77,6 +78,7 @@ struct Vulkan {
     PFN_vkCmdDrawMeshTasksNV cmdDrawMeshTasksNV;
 
     VkSampleCountFlags sampleCountFlags;
+    VkSampleCountFlagBits sampleCountFlagBits;
     uint8_t sampleCount;
 };
 
@@ -94,6 +96,10 @@ struct PipelineInfo {
     bool clockwiseWinding;
     bool cullBackFaces;
     bool depthEnabled;
+    bool writeStencilInvert = VK_FALSE;
+    bool readStencil = VK_FALSE;
+    // TODO(jan): Fix this hack.
+    VkSampleCountFlagBits samples = (VkSampleCountFlagBits)0;
     VkPrimitiveTopology topology;
 };
 
@@ -330,7 +336,8 @@ void destroyVulkanSampler(
 void initVKPipeline(
     Vulkan& vk,
     const PipelineInfo& info,
-    VulkanPipeline&
+    VulkanPipeline& pipeline,
+    VkRenderPass* renderPass = nullptr
 );
 
 // Descriptors

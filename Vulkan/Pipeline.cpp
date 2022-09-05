@@ -1,3 +1,4 @@
+#include "vulkan/vulkan_core.h"
 #pragma warning(disable: 4018)
 #pragma warning(disable: 4267)
 
@@ -251,10 +252,11 @@ void describeInputAttributes(
 void createPipeline(
     Vulkan& vk,
     vector<VulkanShader>& shaders,
-    const PipelineInfo& options,
-    VulkanPipeline& pipeline
+    const PipelineInfo& info,
+    VulkanPipeline& pipeline,
+    VkRenderPass* renderPass = nullptr
 ) {
-    pipeline.options = options;
+    pipeline.options = info;
 
     bool isMeshPipeline = false;
 
@@ -296,9 +298,9 @@ void createPipeline(
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assembly.topology = options.topology;
+    assembly.topology = info.topology;
     assembly.primitiveRestartEnable = VK_FALSE;
-    if (options.topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
+    if (info.topology == VK_PRIMITIVE_TOPOLOGY_LINE_STRIP) {
         assembly.primitiveRestartEnable = VK_TRUE;
     }
 
@@ -323,10 +325,10 @@ void createPipeline(
 
     VkPipelineRasterizationStateCreateInfo raster = {};
     raster.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    raster.frontFace = options.clockwiseWinding
+    raster.frontFace = info.clockwiseWinding
         ? VK_FRONT_FACE_CLOCKWISE
         : VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    raster.cullMode = options.cullBackFaces
+    raster.cullMode = info.cullBackFaces
         ? VK_CULL_MODE_BACK_BIT
         : VK_CULL_MODE_NONE;
     raster.lineWidth = 1.f;
@@ -338,7 +340,11 @@ void createPipeline(
     VkPipelineMultisampleStateCreateInfo msample = {};
     msample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     msample.sampleShadingEnable = VK_FALSE;
-    msample.rasterizationSamples = (VkSampleCountFlagBits)vk.sampleCountFlags;
+    if (info.samples == 0) {
+        msample.rasterizationSamples = (VkSampleCountFlagBits)vk.sampleCountFlags;
+    } else {
+        msample.rasterizationSamples = info.samples;
+    }
     msample.minSampleShading = 1.0f;
     msample.pSampleMask = nullptr;
     msample.alphaToCoverageEnable = VK_FALSE;
@@ -347,12 +353,58 @@ void createPipeline(
     VkPipelineDepthStencilStateCreateInfo depthStencilCreateInfo = {};
     depthStencilCreateInfo.sType =
         VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    depthStencilCreateInfo.depthTestEnable = options.depthEnabled ? VK_TRUE : VK_FALSE;
-    depthStencilCreateInfo.depthWriteEnable = options.depthEnabled ? VK_TRUE : VK_FALSE;
+    depthStencilCreateInfo.depthTestEnable = info.depthEnabled ? VK_TRUE : VK_FALSE;
+    depthStencilCreateInfo.depthWriteEnable = info.depthEnabled ? VK_TRUE : VK_FALSE;
     depthStencilCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
     // TODO(jan): Experiment with enabling this for better performance.
     depthStencilCreateInfo.depthBoundsTestEnable = VK_FALSE;
-    depthStencilCreateInfo.stencilTestEnable = VK_FALSE;
+
+    if (info.writeStencilInvert) {
+        depthStencilCreateInfo.stencilTestEnable = VK_TRUE;
+
+        depthStencilCreateInfo.front.depthFailOp = info.depthEnabled
+            ? VK_STENCIL_OP_KEEP
+            : VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.front.passOp = VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.front.failOp = VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.front.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStencilCreateInfo.front.writeMask = 0xff;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.front.reference = 0;
+
+        depthStencilCreateInfo.back.depthFailOp = info.depthEnabled
+            ? VK_STENCIL_OP_KEEP
+            : VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.back.passOp = VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_INVERT;
+        depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_ALWAYS;
+        depthStencilCreateInfo.back.writeMask = 0xff;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.back.reference = 0;
+    }
+
+    if (info.readStencil) {
+        depthStencilCreateInfo.stencilTestEnable = VK_TRUE;
+
+        depthStencilCreateInfo.front.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.passOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.failOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.front.compareOp = VK_COMPARE_OP_NOT_EQUAL;
+        depthStencilCreateInfo.front.compareMask = 0xff;
+        depthStencilCreateInfo.front.writeMask = 0;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.front.reference = 0;
+
+
+        depthStencilCreateInfo.back.depthFailOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.passOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.failOp = VK_STENCIL_OP_KEEP;
+        depthStencilCreateInfo.back.compareOp = VK_COMPARE_OP_NOT_EQUAL;
+        depthStencilCreateInfo.back.compareMask = 0xff;
+        depthStencilCreateInfo.back.writeMask = 0;
+        // TODO(jan): What does this do?
+        depthStencilCreateInfo.back.reference = 0;
+    }
 
     VkPipelineColorBlendAttachmentState colorBlend = {};
     colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
@@ -389,7 +441,7 @@ void createPipeline(
     createInfo.pMultisampleState = &msample;
     createInfo.pColorBlendState = &blending;
     createInfo.pDepthStencilState = &depthStencilCreateInfo;
-    createInfo.renderPass = vk.renderPass;
+    createInfo.renderPass = renderPass ? *renderPass : vk.renderPass;
     createInfo.layout = pipeline.layout;
     createInfo.subpass = 0;
     
@@ -406,7 +458,8 @@ void createPipeline(
 void initVKPipeline(
     Vulkan& vk,
     const PipelineInfo& info,
-    VulkanPipeline& pipeline
+    VulkanPipeline& pipeline,
+    VkRenderPass* renderPass
 ) {
     pipeline = {};
 
@@ -430,7 +483,8 @@ void initVKPipeline(
         vk,
         shaders,
         info,
-        pipeline
+        pipeline,
+        renderPass
     );
 }
 

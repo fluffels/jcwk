@@ -49,6 +49,11 @@ static inline void vectorNormalize(Vec3& v) {
     v.z /= magnitude;
 }
 
+static inline void vectorScale(float d, Vec2& v) {
+    v.x *= d;
+    v.y *= d;
+}
+
 static inline void vectorScale(float d, Vec3& v) {
     v.x *= d;
     v.y *= d;
@@ -62,16 +67,31 @@ static inline void vectorScale(float d, Vec4& v) {
     v.w *= d;
 }
 
+static inline void vectorAdd(const Vec2& a, const Vec2& b, Vec2& r) {
+    r.x = a.x + b.x;
+    r.y = a.y + b.y;
+}
+
 static inline void vectorAdd(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x + b.x;
     r.y = a.y + b.y;
     r.z = a.z + b.z;
 }
 
+static inline void vectorSub(const Vec2& a, const Vec2& b, Vec2& r) {
+    r.x = a.x - b.x;
+    r.y = a.y - b.y;
+}
+
 static inline void vectorSub(Vec3& a, Vec3& b, Vec3& r) {
     r.x = a.x - b.x;
     r.y = a.y - b.y;
     r.z = a.z - b.z;
+}
+
+static inline void vectorInterpolate(Vec2& a, Vec2&b, float c, Vec2& r) {
+    r.x = a.x + (b.x - a.x) * c;
+    r.y = a.y + (b.y - a.y) * c;
 }
 
 static inline void matrixInit(float* m) {
@@ -161,6 +181,28 @@ static inline void matrixOrtho(
     m[5] = 2.f / screenHeight;
     m[13] = -1;
     m[10] = 0;
+}
+
+static inline void matrixOrthoCenteredOrigin(
+    f32 width,
+    f32 height,
+    float* m
+) {
+    matrixInit(m);
+
+    const float ar = width / (float)height;
+
+    m[0] = 2.f / width;
+    m[5] = -2.f / height;
+    m[15] = 1;
+}
+
+static inline void matrix2DZoom(
+    f32 factor,
+    f32* m
+) {
+    m[0] = factor;
+    m[5] = factor;
 }
 
 static inline void matrixProjection(
@@ -363,4 +405,16 @@ static inline void rotatePoint(Quaternion& q, Vec3& p, Vec3& result) {
     Quaternion r = quaternionMultiply(qTmp, qConj);
 
     result = { r.x, r.y, r.z };
+}
+
+static inline AABox
+offsetAABox(AABox box, Vec2 offset) {
+    AABox result = {};
+
+    result.x0 = box.x0 + offset.x;
+    result.x1 = box.x1 + offset.x;
+    result.y0 = box.y0 + offset.y;
+    result.y1 = box.y1 + offset.y;
+
+    return result;
 }

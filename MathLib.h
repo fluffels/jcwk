@@ -6,6 +6,9 @@
 
 #define PI 3.14159265358979323846f
 
+#define KIBIBYTE 1024
+#define MEBIBYTE 1024 * KIBIBYTE
+
 struct Vec2i {
     s32 x;
     s32 y;
@@ -47,4 +50,11 @@ struct Quaternion {
     f32 y;
     f32 z;
     f32 w;
+};
+
+struct AABox {
+    f32 x0;
+    f32 x1;
+    f32 y0;
+    f32 y1;
 };

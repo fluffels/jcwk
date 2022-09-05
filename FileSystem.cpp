@@ -8,6 +8,7 @@
 
 bool
 fexists(const char* path) {
+    if (!path) return false;
     auto accessResult = _access_s(path, 4);
     return accessResult != ENOENT;
 }
