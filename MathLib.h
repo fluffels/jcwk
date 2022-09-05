@@ -58,3 +58,9 @@ struct AABox {
     f32 y0;
     f32 y1;
 };
+
+struct Triangle {
+    Vec3 p0;
+    Vec3 p1;
+    Vec3 p2;
+};

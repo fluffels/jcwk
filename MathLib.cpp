@@ -4,6 +4,7 @@
 
 #include "Logging.cpp"
 #include "MathLib.h"
+#include "Types.h"
 
 #ifndef max
 #define max(a, b) a > b? a: b
@@ -417,4 +418,11 @@ offsetAABox(AABox box, Vec2 offset) {
     result.y1 = box.y1 + offset.y;
 
     return result;
+}
+
+static inline f32
+gcd(f32 A, f32 B) {
+    if (A > B) return gcd(A-B, B);
+    else if (B > A) return gcd(A, B-A);
+    else return A;
 }
