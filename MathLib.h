@@ -7,8 +7,8 @@
 #define PI 3.14159265358979323846f
 
 struct Vec2i {
-    i32 x;
-    i32 y;
+    s32 x;
+    s32 y;
 };
 
 struct Vec2 {
@@ -17,9 +17,9 @@ struct Vec2 {
 };
 
 struct Vec3i {
-    i32 x;
-    i32 y;
-    i32 z;
+    s32 x;
+    s32 y;
+    s32 z;
 };
 
 struct Vec3 {
@@ -36,10 +36,10 @@ struct Vec4 {
 };
 
 struct Vec4i {
-    i32 x;
-    i32 y;
-    i32 z;
-    i32 w;
+    s32 x;
+    s32 y;
+    s32 z;
+    s32 w;
 };
 
 struct Quaternion {
