@@ -161,11 +161,11 @@ static inline void matrixMultiplyPoint(const float* m, Vec3& v, Vec3& r) {
     r.z = m[2]*v.x + m[6]*v.y + m[10]*v.z + m[14];
 }
 
-static inline void matrixMultiplyPoint(const float* m, Vec3& v, Vec4& r) {
-    r.x = m[0]*v.x + m[4]*v.y + m[8]*v.z + m[12];
-    r.y = m[1]*v.x + m[5]*v.y + m[9]*v.z + m[13];
-    r.z = m[2]*v.x + m[6]*v.y + m[10]*v.z + m[14];
-    r.w = m[3]*v.x + m[7]*v.y + m[11]*v.z + m[15];
+static inline void matrixMultiplyVec(const float* m, Vec4& v, Vec4& r) {
+    r.x = m[0]*v.x + m[4]*v.y + m[8]*v.z + m[12]*v.w;
+    r.y = m[1]*v.x + m[5]*v.y + m[9]*v.z + m[13]*v.w;
+    r.z = m[2]*v.x + m[6]*v.y + m[10]*v.z + m[14]*v.w;
+    r.w = m[3]*v.x + m[7]*v.y + m[11]*v.z + m[15]*v.w;
 }
 
 static inline void matrixOrtho(
