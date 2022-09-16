@@ -227,7 +227,7 @@ static inline void matrixProjection(
     m[14] = -nearz / (farz - nearz);
 }
 
-static inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
+static inline void matrixView(Vec3 pos, Vec3 at, Vec3 down, float* m) {
     float t[16];
     matrixInit(t);
     matrixTranslate(-pos.x, -pos.y, -pos.z, t);
@@ -235,7 +235,8 @@ static inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
     float v[16];
     matrixInit(v);
 
-    Vec3 z = view;
+    Vec3 z;
+    vectorSub(at, pos, z);
     vectorNormalize(z);
 
     Vec3 x;
