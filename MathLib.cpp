@@ -228,7 +228,12 @@ static inline void matrixProjection(
 }
 
 static inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
-    matrixInit(m);
+    float t[16];
+    matrixInit(t);
+    matrixTranslate(-pos.x, -pos.y, -pos.z, t);
+
+    float v[16];
+    matrixInit(v);
 
     Vec3 z = view;
     vectorNormalize(z);
@@ -241,17 +246,18 @@ static inline void matrixView(Vec3 pos, Vec3 view, Vec3 down, float* m) {
     vectorCross(z, x, y);
     vectorNormalize(y);
 
-    m[0] = x.x;
-    m[1] = x.y;
-    m[2] = x.z;
-    m[4] = y.x;
-    m[5] = y.y;
-    m[6] = y.z;
-    m[8] = z.x;
-    m[9] = z.y;
-    m[10] = z.z;
+    v[0] = x.x;
+    v[1] = x.y;
+    v[2] = x.z;
+    v[4] = y.x;
+    v[5] = y.y;
+    v[6] = y.z;
+    v[8] = z.x;
+    v[9] = z.y;
+    v[10] = z.z;
 
-    matrixTranslate(-pos.x, -pos.y, -pos.z, m);
+    matrixInit(m);
+    matrixMultiply(v, t, m);
 }
 
 static inline void quaternionInit(Quaternion& q) {
